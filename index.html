@@ -14,7 +14,7 @@
             color: #333;
         }
     </style>
-    <title>Limited Date Calendar</title>
+    <title>Calendar View</title>
 </head>
 <body>
 
@@ -32,11 +32,11 @@
                 end: '2024-11-01' // End is set to one day after the last date you want visible
             },
             headerToolbar: {
-                left: 'prev,next today',
+                left: '',
                 center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                right: 'prev,next'
             },
-            events: [], // Empty events array; replace or populate as needed
+            events: [], // You can populate events here if needed
             slotDuration: '00:30:00' // 30-minute slots
         });
 

@@ -1,39 +1,6 @@
 <style>
-    #calendar {
-        max-width: 800px;
-        margin: 0 auto;
-        font-family: 'Arial', sans-serif; /* You can change this to any font you prefer */
-        font-size: 14px; /* Adjust the size to your liking */
-        color: #333; /* Main text color */
-    }
-
-    /* Additional styling for the day and time slots */
-    .day {
-        margin-bottom: 20px;
-        padding: 10px;
-        background-color: #f8f8f8;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-    }
-
-    .day-name {
-        font-size: 16px;
-        font-weight: bold;
-        color: #2d3e50; /* Darker color for the day names */
-        margin-bottom: 10px;
-    }
-
-    .time-slot {
-        font-size: 14px;
-        padding: 8px;
-        background-color: #28a745; /* Green background for time slots */
-        color: #ffffff; /* White text color */
-        margin-bottom: 5px;
-        border-radius: 4px;
-        text-align: center;
-    }
-
-    .time-slot:hover {
-        background-color: #218838; /* Darker green on hover */
-    }
-</style>
+        #calendar {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+    </style>

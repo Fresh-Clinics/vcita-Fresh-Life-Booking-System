@@ -1,13 +1,6 @@
 /* styles.css */
 
-/* General Styles */
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f8f8f8;
-    color: #333;
-}
-
-/* Calendar Container Styles */
+/* Calendar Container */
 #calendar {
     width: 100%;
     max-width: 900px;
@@ -17,66 +10,54 @@ body {
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    display: grid; /* Use grid for responsiveness */
+    display: flex; /* Flex for horizontal days */
     gap: 20px;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Responsive columns */
+    overflow-x: auto; /* Allow horizontal scrolling if needed */
 }
 
-/* Calendar Header */
-.calendar-header {
-    font-size: 24px;
-    color: #2d3e50;
-    text-align: center;
-    margin-bottom: 20px;
-    grid-column: span 3; /* Adjust for wider headers */
+/* Day Column */
+.day {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    max-height: 100vh; /* Max height to show full day */
+    overflow-y: auto; /* Vertical scrolling for time slots */
 }
 
-/* Day Name Styles */
+/* Day Name */
 .day-name {
     font-weight: bold;
-    color: #555;
     text-align: center;
-    padding: 5px 0;
-}
-
-/* Calendar Date Styles */
-.calendar-date {
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px;
-    color: #2d3e50;
-    text-align: center;
-    margin: 5px 0;
-}
-
-/* Today's Date Highlight */
-.calendar-date.today {
-    background-color: #ffc107;
+    margin-bottom: 10px;
+    background-color: #2d3e50;
     color: #fff;
-    font-weight: bold;
+    padding: 10px;
+    border-radius: 5px;
 }
 
-/* Time Slot Styles */
+/* Time Slots for Half-Hour Increments */
+.day-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
 .time-slot {
-    display: inline-block; /* Inline block for inline flow */
+    display: block; /* Block to stack vertically */
     padding: 5px 10px;
     background-color: #28a745;
     color: white;
     border-radius: 5px;
     text-align: center;
-    margin: 5px;
-    font-size: 14px; /* Adjust font size */
-    cursor: pointer; /* Cursor change for hover */
+    margin: 2px 0;
+    font-size: 14px;
+    cursor: pointer;
 }
 
 .time-slot:hover {
     background-color: #218838;
-}
-
-/* Additional Adjustments */
-.time-slot-container {
-    display: flex; /* Flex container for time slots */
-    flex-wrap: wrap; /* Wrap time slots */
-    justify-content: center; /* Center align */
-    gap: 10px; /* Space between slots */
 }

@@ -1,6 +1,57 @@
-    <style>
-        #calendar {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-    </style>
+/* styles.css */
+
+body {
+    font-family: 'Arial', sans-serif; /* Change the font */
+    background-color: #f8f8f8; /* Set a background color for the page */
+    color: #333; /* Default text color */
+}
+
+#calendar {
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-header {
+    font-size: 24px;
+    color: #2d3e50;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.day-name {
+    font-weight: bold;
+    color: #555;
+}
+
+.calendar-date {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    color: #2d3e50;
+}
+
+.calendar-date.today {
+    background-color: #ffc107;
+    color: #fff;
+    font-weight: bold;
+}
+
+.time-slot {
+    display: block;
+    padding: 5px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+    margin: 5px 0;
+}
+
+.time-slot:hover {
+    background-color: #218838;
+}

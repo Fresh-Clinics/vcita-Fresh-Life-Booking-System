@@ -22,6 +22,8 @@
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridDay', // Show daily view
+                        initialDate: '2024-10-29',  // Set the starting date
+
                 events: function (fetchInfo, successCallback, failureCallback) {
                     fetch('https://api.vcita.com/v1/your_endpoint', {
                         method: 'GET',

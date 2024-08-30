@@ -1,63 +1,39 @@
-/* styles.css */
+<style>
+    #calendar {
+        max-width: 800px;
+        margin: 0 auto;
+        font-family: 'Arial', sans-serif; /* You can change this to any font you prefer */
+        font-size: 14px; /* Adjust the size to your liking */
+        color: #333; /* Main text color */
+    }
 
-/* Calendar Container */
-#calendar {
-    width: 100%;
-    max-width: 900px;
-    margin: 20px auto;
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    display: flex; /* Flex for horizontal days */
-    gap: 20px;
-    overflow-x: auto; /* Allow horizontal scrolling if needed */
-}
+    /* Additional styling for the day and time slots */
+    .day {
+        margin-bottom: 20px;
+        padding: 10px;
+        background-color: #f8f8f8;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
 
-/* Day Column */
-.day {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    max-height: 100vh; /* Max height to show full day */
-    overflow-y: auto; /* Vertical scrolling for time slots */
-}
+    .day-name {
+        font-size: 16px;
+        font-weight: bold;
+        color: #2d3e50; /* Darker color for the day names */
+        margin-bottom: 10px;
+    }
 
-/* Day Name */
-.day-name {
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 10px;
-    background-color: #2d3e50;
-    color: #fff;
-    padding: 10px;
-    border-radius: 5px;
-}
+    .time-slot {
+        font-size: 14px;
+        padding: 8px;
+        background-color: #28a745; /* Green background for time slots */
+        color: #ffffff; /* White text color */
+        margin-bottom: 5px;
+        border-radius: 4px;
+        text-align: center;
+    }
 
-/* Time Slots for Half-Hour Increments */
-.day-slots {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.time-slot {
-    display: block; /* Block to stack vertically */
-    padding: 5px 10px;
-    background-color: #28a745;
-    color: white;
-    border-radius: 5px;
-    text-align: center;
-    margin: 2px 0;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.time-slot:hover {
-    background-color: #218838;
-}
+    .time-slot:hover {
+        background-color: #218838; /* Darker green on hover */
+    }
+</style>

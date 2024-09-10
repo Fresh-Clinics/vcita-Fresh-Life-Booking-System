@@ -23,40 +23,56 @@
             font-size: 14px;
             overflow-x: hidden; /* Prevent body from scrolling */
         }
+
         #calendar {
-            width: 100%;
+            width: auto; /* Adjust width to auto for dynamic expansion */
             height: 100vh; /* Set to full viewport height for visibility */
             margin: 40px auto;
             overflow: auto; /* Enable overflow for scrolling */
             position: relative; /* Needed for positioning the frozen column */
         }
+
         .fc .fc-scroller {
             overflow-x: auto !important; /* Enable horizontal scrolling in the calendar */
         }
+
         /* Override table layout to allow dynamic column width */
         .fc .fc-scrollgrid {
             table-layout: auto !important; /* Set to auto to allow dynamic width */
+            width: auto !important; /* Adjust width to auto */
         }
+
         /* Ensure all cells in the grid are flexible */
         .fc-theme-standard td {
             min-width: 150px; /* Set minimum width for resource columns */
             white-space: normal !important; /* Allow text to wrap */
             word-wrap: break-word; /* Break words that are too long */
         }
+
         .fc-datagrid-cell-frame {
             max-width: 200px; /* Adjust the maximum width as needed */
             overflow: hidden; /* Hide any overflowing text */
         }
+
         .fc-resource {
             padding: 5px; /* Add some padding around resource titles */
         }
+
         /* Freeze the time grid column on the left */
-        .fc-timegrid-axis {
+        .fc-timegrid-axis-frame {
+            position: -webkit-sticky; /* For Safari */
             position: sticky;
             left: 0;
             z-index: 10; /* Higher z-index to ensure it stays on top */
             background-color: white; /* Set background to prevent overlap */
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for clarity */
+        }
+
+        /* Adjust time column width for better visibility */
+        .fc-timegrid-axis {
+            min-width: 75px; /* Set a minimum width for the time column */
+            max-width: 100px; /* Set a maximum width for the time column */
+            overflow: hidden; /* Ensure content doesn't overflow */
         }
     </style>
 </head>

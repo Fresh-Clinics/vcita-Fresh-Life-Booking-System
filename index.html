@@ -21,28 +21,18 @@
             padding: 0;
             font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
             font-size: 14px;
-            overflow-x: hidden; /* Prevent body from scrolling */
         }
         #calendar {
-            width: 100%;
-            height: 100vh; /* Set to full viewport height for visibility */
+            max-width: 100%;
             margin: 40px auto;
-            overflow: auto; /* Enable overflow for scrolling */
+            overflow-x: auto; /* Enable horizontal scrolling */
+            white-space: nowrap; /* Prevent line breaks between elements */
         }
-        .fc .fc-scroller {
-            overflow-x: auto !important; /* Enable horizontal scrolling in the calendar */
+        .fc-scroller {
+            overflow-x: auto !important; /* Force horizontal scrolling in the calendar content */
         }
-        .fc-col-header-cell, .fc-datagrid-cell-frame {
-            white-space: normal !important; /* Allow text to wrap */
-            word-wrap: break-word; /* Break words that are too long */
-            min-width: 150px; /* Set minimum width for resource columns */
-        }
-        .fc-datagrid-cell-frame {
-            max-width: 200px; /* Adjust the maximum width as needed */
-            overflow: hidden; /* Hide any overflowing text */
-        }
-        .fc-resource {
-            padding: 5px; /* Add some padding around resource titles */
+        .fc .fc-col-header-cell {
+            min-width: 150px; /* Adjust this value to control the minimum width of each resource column */
         }
     </style>
 </head>
@@ -209,8 +199,7 @@
                     }
                 },
                 slotMinTime: '06:00:00', // Set the start time of slots to match your schedule
-                slotMaxTime: '20:00:00',  // Set the end time of slots to match your schedule
-                contentHeight: 'auto' // Make sure the height adjusts to content
+                slotMaxTime: '20:00:00'  // Set the end time of slots to match your schedule
             });
 
             calendar.render();

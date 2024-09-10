@@ -134,4 +134,55 @@
             var calendarEvents = [];
             events.forEach(function (event) {
                 // Ensure each event has the required fields before processing
-                if (event
+                if (event.unit_map && event.id && event.name && event.duration) {
+                    const providerId = event.unit_map; // Assuming unit_map is a provider ID directly
+                    const serviceId = event.id; // Event ID is the service ID
+                    calendarEvents.push({
+                        title: event.name,
+                        start: '2024-10-29T10:00:00', // Use sample start/end time for debugging
+                        end: '2024-10-29T11:00:00',
+                        resourceId: providerId,
+                        description: event.description || ''
+                    });
+                } else {
+                    console.warn("Event missing required data:", event);
+                }
+            });
+
+            console.log("Processed Resources:", resources);
+            console.log("Processed Events:", calendarEvents);
+
+            // Render the calendar with fetched data
+            renderCalendar(resources, calendarEvents);
+        }
+
+        function renderCalendar(resources, calendarEvents) {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                timeZone: 'UTC',
+                initialView: 'resourceTimeGridDay',
+                resources: resources,
+                events: calendarEvents,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'resourceTimeGridDay,resourceTimeGridWeek'
+                },
+                eventContent: function (arg) {
+                    return {
+                        html: `<div class="fc-event-content">
+                                  <div class="fc-event-title">${arg.event.title}</div>
+                                  <div class="fc-event-time">${new Date(arg.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(arg.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                               </div>`
+                    };
+                }
+            });
+
+            calendar.render();
+            console.log("Calendar rendered with events.");
+        }
+    });
+</script>
+
+</body>
+</html>

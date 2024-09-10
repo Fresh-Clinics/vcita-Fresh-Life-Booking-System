@@ -182,8 +182,15 @@
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'resourceTimeGridDay,resourceTimeGridFourDay'
+                    right: 'resourceTimeGridDay,resourceTimeGridThreeDay'
                 },
+                      views: {
+        resourceTimeGridThreeDay: {
+          type: 'resourceTimeGrid',
+          duration: { days: 3 },
+          buttonText: '3 days'
+        }
+      },
                 eventContent: function (arg) {
                     // More detailed rendering using a simple check if all required elements are present
                     if (arg.event && arg.event.title && arg.event.start && arg.event.end) {

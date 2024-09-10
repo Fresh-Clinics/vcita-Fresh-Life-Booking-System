@@ -38,12 +38,6 @@
     $(document).ready(function () {
         console.log("Initializing SimplyBook Widget with Providers...");
 
-        // Ensure no previous calendar instance exists
-        if ($('#calendar').children().length > 0) {
-            console.log("Clearing previous FullCalendar instance.");
-            $('#calendar').empty(); // Clear previous calendar if it exists
-        }
-
         // Initialize JSON-RPC Client for SimplyBook API to fetch the token
         try {
             var loginClient = new JSONRpcClient({
@@ -57,7 +51,7 @@
             loginClient.getToken('thefreshlifeconference', '5622f213016960fc53a1c61e6ac61aee0eabebcedd688b374f9761c9c6f69dce', function (token) {
                 if (token) {
                     console.log("Fetched token: ", token);
-                    // Once token is fetched, use it to get the list of services and providers
+                    // Fetch providers and then render the calendar with the token
                     fetchProvidersAndRenderCalendar(token);
                 } else {
                     console.error("Failed to fetch token. Please check your API credentials.");
@@ -69,52 +63,39 @@
 
         function fetchProvidersAndRenderCalendar(token) {
             console.log("Fetching providers...");
-            try {
-                var client = new JSONRpcClient({
-                    'url': 'https://user-api.simplybook.me',
-                    'headers': {
-                        'X-Company-Login': 'thefreshlifeconference',
-                        'X-Token': token
-                    },
-                    'onerror': function (error) {
-                        console.error("Error in JSON-RPC client setup:", error);
-                    }
-                });
+            var client = new JSONRpcClient({
+                'url': 'https://user-api.simplybook.me',
+                'headers': {
+                    'X-Company-Login': 'thefreshlifeconference',
+                    'X-Token': token
+                },
+                'onerror': function (error) {
+                    console.error("Error in JSON-RPC client setup:", error);
+                }
+            });
 
-                // Fetch providers (units) from SimplyBook.me
-                client.request('getUnitList', [], function (providers) {
-                    if (providers) {
-                        console.log("Fetched providers:", providers);
-                        var resources = Object.values(providers)
-                            .map(function (provider) {
-                                if (!provider.id || !provider.name) {
-                                    console.warn("Provider missing required fields:", provider);
-                                    return null;
-                                }
-                                return {
-                                    id: provider.id,
-                                    title: provider.name,
-                                    position: parseInt(provider.position) || 0, // Ensure position is an integer for sorting
-                                    color: provider.color || '',       // Include color for later use
-                                    picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '', // Include picture path
-                                    description: provider.description || '',  // Include description
-                                };
-                            })
-                            .filter(resource => resource !== null);
+            // Fetch providers (units) from SimplyBook.me
+            client.request('getUnitList', [], function (providers) {
+                if (providers) {
+                    console.log("Fetched providers:", providers);
+                    var resources = Object.values(providers).map(provider => ({
+                        id: provider.id,
+                        title: provider.name,
+                        position: parseInt(provider.position) || 0,
+                        color: provider.color || '',
+                        picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '',
+                        description: provider.description || ''
+                    }));
 
-                        renderCalendar(resources, token); // Render the calendar after fetching providers
-                    } else {
-                        console.error("No providers returned. Please check the API response.");
-                        renderCalendar([], token); // Render empty calendar
-                    }
-                }, function (error) {
-                    console.error("Error fetching providers:", error);
+                    renderCalendar(resources, token);
+                } else {
+                    console.error("No providers returned. Please check the API response.");
                     renderCalendar([], token); // Render empty calendar
-                });
-            } catch (e) {
-                console.error("Error fetching providers:", e);
+                }
+            }, function (error) {
+                console.error("Error fetching providers:", error);
                 renderCalendar([], token); // Render empty calendar
-            }
+            });
         }
 
         function fetchEventsForRange(token, start, end, callback) {
@@ -132,7 +113,7 @@
             // Fetch events (services) from SimplyBook.me
             client.request('getEventList', [], function (events) {
                 if (events) {
-                    console.log("Fetched events (raw):", events);  // Log all events to inspect structure
+                    console.log("Fetched events (raw):", events);
 
                     // Ensure the events object is correctly handled
                     if (typeof events === 'object' && !Array.isArray(events)) {
@@ -170,18 +151,14 @@
                             // Fetch end time dynamically using calculateEndTime
                             fetchEventEndTime(token, startTime, event.id, providerId, function (endTime) {
                                 if (endTime) {
-                                    // Convert start and end times to the correct timezone
-                                    const formattedStartTime = convertToTimezone(startTime, 'Australia/Sydney');
-                                    const formattedEndTime = convertToTimezone(endTime, 'Australia/Sydney');
-
                                     // Push the event into the calendarEvents array
                                     calendarEvents.push({
                                         id: event.id,
                                         title: event.name,
-                                        start: formattedStartTime,  // Dynamic start time in AEST
-                                        end: formattedEndTime,      // Dynamic end time in AEST
-                                        resourceId: providerId,  // Resource ID matches provider
-                                        description: event.description || '',
+                                        start: startTime,
+                                        end: endTime,
+                                        resourceId: providerId,
+                                        description: event.description || ''
                                     });
                                 }
 
@@ -263,19 +240,6 @@
             });
         }
 
-        function convertToTimezone(dateTimeStr, timeZone) {
-            return new Date(dateTimeStr).toLocaleString('en-AU', {
-                timeZone: timeZone,
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-            });
-        }
-
         function renderCalendar(resources, token) {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -307,19 +271,19 @@
                 eventContent: function (arg) {
                     if (arg.event && arg.event.title && arg.event.start && arg.event.end) {
                         // Format the time to display in Australia/Sydney timezone
-                        const formattedStart = new Intl.DateTimeFormat('en-AU', {
+                        const formattedStart = new Date(arg.event.start).toLocaleString('en-AU', {
                             timeZone: 'Australia/Sydney',
                             hour: '2-digit',
                             minute: '2-digit',
                             hour12: true
-                        }).format(new Date(arg.event.start));
+                        });
 
-                        const formattedEnd = new Intl.DateTimeFormat('en-AU', {
+                        const formattedEnd = new Date(arg.event.end).toLocaleString('en-AU', {
                             timeZone: 'Australia/Sydney',
                             hour: '2-digit',
                             minute: '2-digit',
                             hour12: true
-                        }).format(new Date(arg.event.end));
+                        });
 
                         return {
                             html: `<div class="fc-event-content">

@@ -157,11 +157,13 @@
         function processEvents(events, token, start, end, callback) {
             var calendarEvents = [];
             var processedCount = 0;
+            var providersWithEvents = new Set(); // Keep track of providers with events
 
             events.forEach(function (event) {
                 if (event.unit_map && event.id && event.name) {
                     console.log("Processing event:", event); // Log each event to verify its structure
                     const providerId = Object.keys(event.unit_map)[0]; // Get the provider ID from the unit_map
+                    providersWithEvents.add(providerId); // Add the provider ID to the set
 
                     // Fetch start time dynamically using getStartTimeMatrix
                     fetchEventStartTime(token, event.id, providerId, start, end, function (startTime) {
@@ -183,13 +185,13 @@
                                 // Check if all events are processed
                                 processedCount++;
                                 if (processedCount === events.length) {
-                                    callback(calendarEvents); // Callback with all processed events
+                                    callback(calendarEvents, providersWithEvents); // Callback with all processed events and providers with events
                                 }
                             });
                         } else {
                             processedCount++;
                             if (processedCount === events.length) {
-                                callback(calendarEvents); // Callback with all processed events
+                                callback(calendarEvents, providersWithEvents); // Callback with all processed events and providers with events
                             }
                         }
                     });
@@ -197,7 +199,7 @@
                     console.warn("Event missing required data or incorrect format:", event);
                     processedCount++;
                     if (processedCount === events.length) {
-                        callback(calendarEvents); // Callback with all processed events
+                        callback(calendarEvents, providersWithEvents); // Callback with all processed events and providers with events
                     }
                 }
             });
@@ -274,7 +276,13 @@
                 timeZone: 'Australia/Sydney', // Set timezone to AEST
                 initialView: 'resourceTimeGridDay',
                 initialDate: '2024-10-29',
-                resources: resources,
+                resources: function (callback) {
+                    // Fetch resources and filter out those without events
+                    fetchEventsForRange(token, calendar.view.activeStart.toISOString().split('T')[0], calendar.view.activeEnd.toISOString().split('T')[0], function (events, providersWithEvents) {
+                        const filteredResources = resources.filter(resource => providersWithEvents.has(resource.id));
+                        callback(filteredResources);
+                    });
+                },
                 events: function (info, successCallback, failureCallback) {
                     // Fetch events for the current date range
                     fetchEventsForRange(token, info.startStr, info.endStr, successCallback);
@@ -300,7 +308,7 @@
                 eventDidMount: function (info) {
                     // Initialize tippy.js for tooltips with HTML content
                     tippy(info.el, {
-                        content: info.event.extendedProps.description, // Use the event's description as the tooltip content
+                        content: `<strong>${info.event.title}</strong><br>${info.event.extendedProps.description}`, // Event name in bold and description below
                         allowHTML: true, // Enable HTML in the tooltip
                         theme: 'light-border', // Choose a theme for the tooltip
                         placement: 'top', // Set the placement of the tooltip

@@ -59,7 +59,11 @@
                     client.request('getEventList', [], function (events) {
                         console.log("Fetched events:", events);
                         setupFullCalendar(providers, events);
+                    }, function (error) {
+                        console.error("Error fetching events:", error);
                     });
+                }, function (error) {
+                    console.error("Error fetching providers:", error);
                 });
             }
 
@@ -73,17 +77,25 @@
 
                 // Map events to FullCalendar events
                 var calendarEvents = Object.values(events).map(function (event) {
-                    // Assuming each event has a start_time, end_time, and unit_id (provider ID)
-                    return {
-                        title: event.name, // Name of the service
-                        start: new Date(event.start_time),  // Corrected format to Date object
-                        end: new Date(event.end_time),      // Corrected format to Date object
-                        resourceId: event.unit_map ? Object.keys(event.unit_map)[0] : null, // Assign the event to a specific provider (resource)
-                        description: event.description, // Include description if needed
-                        backgroundColor: '#6b9080', // Example color styling
-                        borderColor: '#216849'
-                    };
-                });
+                    // Ensure event has the necessary properties
+                    if (event.start_time && event.end_time && event.unit_map) {
+                        return {
+                            title: event.name, // Name of the service
+                            start: event.start_time,  // Use date strings directly from API
+                            end: event.end_time,      // Use date strings directly from API
+                            resourceId: Object.keys(event.unit_map)[0], // Assign the event to a specific provider (resource)
+                            description: event.description, // Include description if needed
+                            backgroundColor: '#6b9080', // Example color styling
+                            borderColor: '#216849'
+                        };
+                    } else {
+                        console.warn("Event missing required data:", event);
+                        return null;
+                    }
+                }).filter(event => event !== null); // Filter out any null events
+
+                console.log("Resources for FullCalendar:", resources);
+                console.log("Events for FullCalendar:", calendarEvents);
 
                 var calendar = new FullCalendar.Calendar(calendarEl, {
                     schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives', // Add the license key for free trial
@@ -101,7 +113,7 @@
                         return { 
                             html: `<div class="fc-event-content">
                                       <div class="fc-event-title">${arg.event.title}</div>
-                                      <div class="fc-event-time">${arg.event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${arg.event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                      <div class="fc-event-time">${new Date(arg.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(arg.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                                    </div>`
                         };
                     }

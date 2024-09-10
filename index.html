@@ -153,24 +153,50 @@
                 })
                 .filter(resource => resource !== null);
 
-            // Map events to FullCalendar events
+            // Map events to FullCalendar events, including all fields
             var calendarEvents = [];
             events.forEach(function (event) {
-                // Ensure each event has the required fields before processing
                 if (event.unit_map && event.id && event.name && event.start && event.end) {
                     const providerId = event.unit_map; // Assuming unit_map is a provider ID directly
                     const eventStart = new Date(event.start).toISOString();
                     const eventEnd = new Date(event.end).toISOString();
-                    
-                    // Debugging: Log each event to verify correct data
-                    console.log(`Processing Event: ${event.name}, Start: ${eventStart}, End: ${eventEnd}, Resource: ${providerId}`);
-                    
+
+                    // Return all fields of the event
                     calendarEvents.push({
+                        id: event.id,
                         title: event.name,
                         start: eventStart,  // Ensure start is in ISO format
                         end: eventEnd,      // Ensure end is in ISO format
                         resourceId: providerId,  // Resource ID matches provider
-                        description: event.description || ''
+                        description: event.description || '',
+                        additional_fields: event.additional_fields || [],
+                        bookings_limit: event.bookings_limit || '',
+                        buffertime_after: event.buffertime_after || '',
+                        buffertime_before: event.buffertime_before || '',
+                        categories: event.categories || [],
+                        class_id: event.class_id || null,
+                        duration: event.duration || '',
+                        file_id: event.file_id || '',
+                        has_paid_attributes: event.has_paid_attributes || false,
+                        hide_duration: event.hide_duration || '',
+                        is_active: event.is_active || '0',
+                        is_public: event.is_public || '0',
+                        is_recurring: event.is_recurring || '0',
+                        is_visible: event.is_visible || '0',
+                        max_time_till_event: event.max_time_till_event || null,
+                        min_time_till_event: event.min_time_till_event || null,
+                        paid_attributes: event.paid_attributes || [],
+                        picture: event.picture_path ? `${event.picture_sub_path}/${event.picture}` : '',
+                        picture_path: event.picture_path || '',
+                        picture_sub_path: event.picture_sub_path || '',
+                        position: parseInt(event.position) || 0,
+                        position_in_category: event.position_in_category || {},
+                        products: event.products || [],
+                        providers: event.providers || [],
+                        resource_groups: event.resource_groups || [],
+                        seo_url: event.seo_url || null,
+                        short_description: event.short_description || '',
+                        ticket_id: event.ticket_id || null
                     });
                 } else {
                     console.warn("Event missing required data:", event);
@@ -187,45 +213,44 @@
         function renderCalendar(resources, calendarEvents) {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                 height: 'auto', // enough to active sticky headers
-                 dayMinWidth: 200,
-                 slotDuration: '00:30:00',
-                 schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives', // Include the license key
-                 timeZone: 'Australia/Sydney',
-                 locale: 'en-AU',
-                 initialView: 'resourceTimeGridDay',
-                 initialDate: '2024-10-29', // Set the initial date to October 29, 2024
-                 resources: resources,
-                 events: calendarEvents,
-                 headerToolbar: {
-                     left: 'prev,next today',
-                     center: 'title',
-                     right: 'resourceTimeGridDay,resourceTimeGridThreeDay'
-                 },
-                 views: {
-                     resourceTimeGridThreeDay: {
-                         type: 'resourceTimeGrid',
-                         duration: { days: 3 },
-                         buttonText: '3 days'
-                     }
-                 },
-                 resourceOrder: 'position', // Set resourceOrder to 'position' to sort by position field
-                 eventContent: function (arg) {
-                     // More detailed rendering using a simple check if all required elements are present
-                     if (arg.event && arg.event.title && arg.event.start && arg.event.end) {
-                         return {
-                             html: `<div class="fc-event-content">
-                                       <div class="fc-event-title">${arg.event.title}</div>
-                                       <div class="fc-event-time">${new Date(arg.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(arg.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                    </div>`
-                         };
-                     } else {
-                         console.warn("Event data is missing or incorrect", arg.event);
-                         return { html: '<div class="fc-event-content"><div class="fc-event-title">Invalid Event</div></div>' };
-                     }
-                 },
-                 slotMinTime: '08:00:00', // Set the start time of slots to match your schedule
-                 slotMaxTime: '23:00:00'  // Set the end time of slots to match your schedule
+                height: 'auto', // enough to active sticky headers
+                dayMinWidth: 200,
+                slotDuration: '00:30:00',
+                schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives', // Include the license key
+                timeZone: 'Australia/Sydney',
+                locale: 'en-AU',
+                initialView: 'resourceTimeGridDay',
+                initialDate: '2024-10-29', // Set the initial date to October 29, 2024
+                resources: resources,
+                events: calendarEvents,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'resourceTimeGridDay,resourceTimeGridThreeDay'
+                },
+                views: {
+                    resourceTimeGridThreeDay: {
+                        type: 'resourceTimeGrid',
+                        duration: { days: 3 },
+                        buttonText: '3 days'
+                    }
+                },
+                resourceOrder: 'position', // Sort resources by position
+                eventContent: function (arg) {
+                    if (arg.event && arg.event.title && arg.event.start && arg.event.end) {
+                        return {
+                            html: `<div class="fc-event-content">
+                                      <div class="fc-event-title">${arg.event.title}</div>
+                                      <div class="fc-event-time">${new Date(arg.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} - ${new Date(arg.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</div>
+                                   </div>`
+                        };
+                    } else {
+                        console.warn("Event data is missing or incorrect", arg.event);
+                        return { html: '<div class="fc-event-content"><div class="fc-event-title">Invalid Event</div></div>' };
+                    }
+                },
+                slotMinTime: '08:00:00', // Set the start time of slots to match your schedule
+                slotMaxTime: '23:00:00'  // Set the end time of slots to match your schedule
             });
 
             calendar.render();

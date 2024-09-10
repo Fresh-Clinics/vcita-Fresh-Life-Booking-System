@@ -147,7 +147,7 @@
 
                     // Fetch start time dynamically using getStartTimeMatrix
                     fetchEventStartTime(token, event.id, providerId, start, end, function (startTime) {
-                        if (startTime) {
+                        if (startTime && isDateInRange(startTime, start, end)) { // Check if start time is within the active date range
                             // Fetch end time dynamically using calculateEndTime
                             fetchEventEndTime(token, startTime, event.id, providerId, function (endTime) {
                                 if (endTime) {
@@ -183,6 +183,11 @@
                     }
                 }
             });
+        }
+
+        function isDateInRange(date, start, end) {
+            const dateObj = new Date(date);
+            return dateObj >= new Date(start) && dateObj <= new Date(end); // Check if date is within the range
         }
 
         function fetchEventStartTime(token, eventId, unitId, from, to, callback) {

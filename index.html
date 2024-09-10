@@ -197,7 +197,8 @@
                 }
             });
 
-            client.request('getStartTimeMatrix', [from, to, eventId, [unitId], 1, null, []], function (timeMatrix) {
+            // Fetch start times only for the current visible days
+            client.request('getStartTimeMatrix', [from, from, eventId, [unitId], 1, null, []], function (timeMatrix) {
                 console.log("Fetched start times for event:", timeMatrix);
                 if (timeMatrix && Object.keys(timeMatrix).length > 0) {
                     const firstDate = Object.keys(timeMatrix)[0]; // Get the first available date
@@ -269,26 +270,10 @@
                 },
                 resourceOrder: 'position', // Sort resources by position
                 eventContent: function (arg) {
-                    if (arg.event && arg.event.title && arg.event.start && arg.event.end) {
-                        // Format the time to display in Australia/Sydney timezone
-                        const formattedStart = new Date(arg.event.start).toLocaleString('en-AU', {
-                            timeZone: 'Australia/Sydney',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: true
-                        });
-
-                        const formattedEnd = new Date(arg.event.end).toLocaleString('en-AU', {
-                            timeZone: 'Australia/Sydney',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: true
-                        });
-
+                    if (arg.event && arg.event.title) {
                         return {
                             html: `<div class="fc-event-content">
                                       <div class="fc-event-title">${arg.event.title}</div>
-                                      <div class="fc-event-time">${formattedStart} - ${formattedEnd}</div>
                                    </div>`
                         };
                     } else {

@@ -2,26 +2,96 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fresh Life 2024 Booking System</title>
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.3/main.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.3/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/Fresh-Clinics/vcita-Fresh-Life-Booking-System@main/json-rpc-client.js"></script> <!-- Include the JSON-RPC client -->
-    <script src="calendar.js"></script> <!-- Include your updated calendar.js -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        #calendar {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-    </style>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimplyBook.me Scheduler Widget</title>
+    <!-- Include FullCalendar CSS and JavaScript -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.0/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.0/main.min.js"></script>
+ 
+    <!-- Link to External CSS File -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Include jQuery and the JSON-RPC Client Script -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="json-rpc-client.js"></script>
+    
 </head>
 <body>
+
     <div id="calendar"></div>
+
+    <script>
+        $(document).ready(function () {
+            console.log("Initializing SimplyBook Widget with Providers...");
+
+            // Initialize JSON-RPC Client for SimplyBook API to fetch the token
+            var loginClient = new JSONRpcClient({
+                'url': 'https://user-api.simplybook.me/login',
+                'onerror': function (error) {
+                    alert("Error: " + error.message);
+                }
+            });
+
+            // Fetch token dynamically using the SimplyBook API credentials
+            loginClient.getToken('thefreshlifeconference', '5622f213016960fc53a1c61e6ac61aee0eabebcedd688b374f9761c9c6f69dce', function (token) {
+                console.log("Fetched token: ", token);
+                // Once token is fetched, use it to get the list of services and providers
+                fetchProvidersAndEvents(token);
+            });
+
+            function fetchProvidersAndEvents(token) {
+                console.log("Fetching providers and events...");
+                var client = new JSONRpcClient({
+                    'url': 'https://user-api.simplybook.me',
+                    'headers': {
+                        'X-Company-Login': 'thefreshlifeconference',
+                        'X-Token': token
+                    }
+                });
+
+                // Fetch providers (units) from SimplyBook.me
+                client.request('getUnitList', [], function (providers) {
+                    console.log("Fetched providers:", providers);
+                    
+                    // Fetch events (services) from SimplyBook.me
+                    client.request('getEventList', [], function (events) {
+                        console.log("Fetched events:", events);
+                        setupFullCalendar(providers, events);
+                    });
+                });
+            }
+
+            function setupFullCalendar(providers, events) {
+                var calendarEl = document.getElementById('calendar');
+
+                // Map providers to FullCalendar resources
+                var resources = Object.values(providers).map(function (provider) {
+                    return { id: provider.id, title: provider.name };
+                });
+
+                // Map events to FullCalendar events
+                var calendarEvents = Object.values(events).map(function (event) {
+                    return {
+                        title: event.name,
+                        start: event.start_time,  // Use the correct start time format from your API response
+                        end: event.end_time,      // Use the correct end time format from your API response
+                        resourceId: event.unit_id // Assign the event to a specific provider (resource)
+                    };
+                });
+
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives', // Add the license key for free trial
+                    initialView: 'resourceTimeGridDay', // Show daily view broken down by resources
+                    initialDate: '2024-10-29',  // Set the starting date
+                    resources: resources,
+                    events: calendarEvents
+                });
+
+                calendar.render();
+            }
+        });
+    </script>
 </body>
 </html>

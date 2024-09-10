@@ -100,16 +100,14 @@
 
                 // Map events to FullCalendar events
                 var calendarEvents = Object.values(events).map(function (event) {
-                    if (!event.unit_map || Object.keys(event.unit_map).length === 0) {
-                        console.warn("Event missing unit_map or provider data:", event);
-                        return null; 
+                    // Ensure unit_map is valid and start and end dates exist
+                    if (!event.unit_map || !event.start_date || !event.end_date) {
+                        console.warn("Event missing required data:", event);
+                        return null;
                     }
-                    const providerId = Object.keys(event.unit_map)[0];
-                    
-                    if (!event.start_date || !event.end_date) {
-                        console.warn("Event missing date information:", event);
-                        return null; 
-                    }
+
+                    // Since unit_map appears to be a number directly, use it as resourceId
+                    const providerId = event.unit_map; 
 
                     // Return valid event for FullCalendar
                     return {

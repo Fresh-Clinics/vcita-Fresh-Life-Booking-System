@@ -86,18 +86,22 @@
                                     processEventsAndRenderCalendar(providers, events, token, client);
                                 } else {
                                     console.error("No events returned. Please check the API response.");
+                                    renderCalendar(document.getElementById('calendar'), [], []); // Render empty calendar
                                 }
                             }, function (error) {
                                 console.error("Error fetching events:", error);
                             });
                         } else {
                             console.error("No providers returned. Please check the API response.");
+                            renderCalendar(document.getElementById('calendar'), [], []); // Render empty calendar
                         }
                     }, function (error) {
                         console.error("Error fetching providers:", error);
+                        renderCalendar(document.getElementById('calendar'), [], []); // Render empty calendar
                     });
                 } catch (e) {
                     console.error("Error fetching providers or events:", e);
+                    renderCalendar(document.getElementById('calendar'), [], []); // Render empty calendar
                 }
             }
 
@@ -115,58 +119,56 @@
 
                 // Map events to FullCalendar events
                 var calendarEvents = [];
-                var totalEventsToFetch = events.length;
-                var processedEvents = 0; // Track processed events to render calendar
+                var promises = []; // To handle asynchronous calls
 
                 events.forEach(function (event) {
                     // Ensure unit_map is valid and start and end dates exist
                     if (!event.unit_map || !event.id || !event.name || !event.duration) {
                         console.warn("Event missing required data:", event);
-                        processedEvents++;
-                        if (processedEvents === totalEventsToFetch) {
-                            renderCalendar(calendarEl, resources, calendarEvents);
-                        }
-                        return;
+                        return; // Skip invalid events
                     }
 
                     const providerId = event.unit_map; // Assuming unit_map is a provider ID directly
                     const serviceId = event.id; // Event ID is the service ID
 
                     // Fetch available start times for this service and provider
-                    client.request('getStartTimeMatrix', ['2024-10-29', '2024-10-30', serviceId, providerId, 1], function (availableTimes) {
-                        if (availableTimes && availableTimes['2024-10-29']) {
-                            availableTimes['2024-10-29'].forEach(function (startTime) {
-                                // Calculate end time based on service duration
-                                client.request('calculateEndTime', [`2024-10-29 ${startTime}`, serviceId, providerId], function (endTime) {
-                                    if (endTime) {
-                                        calendarEvents.push({
-                                            title: event.name,
-                                            start: `2024-10-29T${startTime}`,
-                                            end: endTime,
-                                            resourceId: providerId,
-                                            description: event.description || '',
-                                            backgroundColor: '#6b9080',
-                                            borderColor: '#216849'
-                                        });
-                                    } else {
-                                        console.warn("Unable to calculate end time for event:", event);
-                                    }
-
-                                    processedEvents++;
-                                    if (processedEvents === totalEventsToFetch) {
-                                        // Render the calendar once all events are processed
-                                        renderCalendar(calendarEl, resources, calendarEvents);
-                                    }
+                    let promise = new Promise((resolve, reject) => {
+                        client.request('getStartTimeMatrix', ['2024-10-29', '2024-10-30', serviceId, providerId, 1], function (availableTimes) {
+                            if (availableTimes && availableTimes['2024-10-29']) {
+                                availableTimes['2024-10-29'].forEach(function (startTime) {
+                                    // Calculate end time based on service duration
+                                    client.request('calculateEndTime', [`2024-10-29 ${startTime}`, serviceId, providerId], function (endTime) {
+                                        if (endTime) {
+                                            calendarEvents.push({
+                                                title: event.name,
+                                                start: `2024-10-29T${startTime}`,
+                                                end: endTime,
+                                                resourceId: providerId,
+                                                description: event.description || '',
+                                                backgroundColor: '#6b9080',
+                                                borderColor: '#216849'
+                                            });
+                                        } else {
+                                            console.warn("Unable to calculate end time for event:", event);
+                                        }
+                                        resolve();
+                                    });
                                 });
-                            });
-                        } else {
-                            console.warn("No available times for event:", event);
-                            processedEvents++;
-                            if (processedEvents === totalEventsToFetch) {
-                                renderCalendar(calendarEl, resources, calendarEvents);
+                            } else {
+                                console.warn("No available times for event:", event);
+                                resolve();
                             }
-                        }
+                        });
                     });
+                    promises.push(promise);
+                });
+
+                Promise.all(promises).then(() => {
+                    // Render the calendar once all events are processed
+                    renderCalendar(calendarEl, resources, calendarEvents);
+                }).catch(error => {
+                    console.error("Error processing events:", error);
+                    renderCalendar(calendarEl, resources, []); // Render calendar even if there's an error
                 });
             }
 

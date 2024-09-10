@@ -72,6 +72,17 @@
                             client.request('getEventList', [], function (events) {
                                 if (events) {
                                     console.log("Fetched events:", events);  // Log all events to inspect structure
+                                    
+                                    // Check if events is an array
+                                    if (typeof events === 'object') {
+                                        events = Object.values(events); // Convert to array if it's an object
+                                    }
+
+                                    if (!Array.isArray(events)) {
+                                        console.error("Expected events to be an array but got:", typeof events);
+                                        return;
+                                    }
+
                                     processEventsAndRenderCalendar(providers, events, token, client);
                                 } else {
                                     console.error("No events returned. Please check the API response.");

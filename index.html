@@ -151,7 +151,10 @@
                         station_id: provider.station_id || ''
                     };
                 })
-                .filter(resource => resource !== null);
+                .filter(resource => resource !== null)
+                .sort(function (a, b) { // Sort resources by 'position' and 'name'
+                    return a.position - b.position || a.title.localeCompare(b.title);
+                });
 
             // Map events to FullCalendar events
             var calendarEvents = [];
@@ -209,7 +212,6 @@
                          buttonText: '3 days'
                      }
                  },
-                 resourceOrder: 'id', // Set resourceOrder to 'id' to maintain fetched order
                  eventContent: function (arg) {
                      // More detailed rendering using a simple check if all required elements are present
                      if (arg.event && arg.event.title && arg.event.start && arg.event.end) {

@@ -73,7 +73,7 @@
                                 if (events) {
                                     console.log("Fetched events:", events);  // Log all events to inspect structure
                                     
-                                    // Check if events is an array
+                                    // Convert events object to array if necessary
                                     if (typeof events === 'object') {
                                         events = Object.values(events); // Convert to array if it's an object
                                     }
@@ -120,9 +120,12 @@
 
                 events.forEach(function (event) {
                     // Ensure unit_map is valid and start and end dates exist
-                    if (!event.unit_map || !event.id) {
+                    if (!event.unit_map || !event.id || !event.name || !event.duration) {
                         console.warn("Event missing required data:", event);
                         processedEvents++;
+                        if (processedEvents === totalEventsToFetch) {
+                            renderCalendar(calendarEl, resources, calendarEvents);
+                        }
                         return;
                     }
 

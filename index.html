@@ -169,12 +169,12 @@
                     console.log(`Processing Event: ${event.name}, Start: ${eventStart}, End: ${eventEnd}, Resource: ${providerId}`);
                     
                     calendarEvents.push({
-                        title: event.name,
-                        start: eventStart,  // Ensure start is in ISO format
-                        end: eventEnd,      // Ensure end is in ISO format
-                        resourceId: providerId,  // Resource ID matches provider
-                        description: event.description || ''
-                    });
+                title: event.name,
+                start: "2024-10-30T09:00:00", // Ensure start is in ISO format
+                end: "2024-10-30T11:00:00", // Ensure end is in ISO format
+                resourceId: 27, // Resource ID matches provider
+                description: event.description || "",
+              });
                 } else {
                     console.warn("Event missing required data:", event);
                 }

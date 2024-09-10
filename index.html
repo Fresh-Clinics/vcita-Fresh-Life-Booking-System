@@ -2,61 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>vCita Scheduler Widget</title>
-    <!-- Include FullCalendar CSS and JavaScript -->
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.0/main.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.0/main.min.js"></script>
- 
-    <!-- Link to External CSS File -->
-    <link rel="stylesheet" href="styles.css">
-    
+    <title>Fresh Life 2024 Booking System</title>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.3/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Fresh-Clinics/vcita-Fresh-Life-Booking-System@main/json-rpc-client.js"></script> <!-- Include the JSON-RPC client -->
+    <script src="calendar.js"></script> <!-- Include your updated calendar.js -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        #calendar {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
-
     <div id="calendar"></div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'resourceTimeGridDay', // Show daily view broken down by resources
-                initialDate: '2024-10-29',  // Set the starting date
-                resources: [
-                    { id: 'galderma', title: 'Galderma' },
-                    { id: 'allergan', title: 'Allergan' },
-                    { id: 'evolus', title: 'Evolus' },
-                    // Add more staff members here
-                ],
-                events: function (fetchInfo, successCallback, failureCallback) {
-                    fetch('https://api.vcita.com/v1/your_endpoint', {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `Bearer YOUR_VCITA_API_KEY`,
-                            'X-API-Token': 'YOUR_INTANDEM_API_TOKEN'
-                        }
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            const events = data.map(event => ({
-                                title: event.staff_name,
-                                start: event.start_time,
-                                end: event.end_time,
-                                resourceId: event.staff_id  // Assign the event to a specific resource
-                            }));
-                            successCallback(events);
-                        })
-                        .catch(error => {
-                            console.error('Error fetching events:', error);
-                            failureCallback(error);
-                        });
-                }
-            });
-            calendar.render();
-        });
-    </script>
 </body>
 </html>

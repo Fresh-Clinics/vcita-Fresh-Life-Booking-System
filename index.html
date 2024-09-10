@@ -32,8 +32,9 @@
             position: relative; /* Needed for positioning the frozen column */
         }
 
+        /* Adjust the scroller to handle horizontal scrolling */
         .fc .fc-scroller {
-            overflow-x: auto !important; /* Enable horizontal scrolling in the calendar */
+            overflow-x: auto !important; /* Enable horizontal scrolling */
         }
 
         /* Override table layout to allow dynamic column width */
@@ -45,6 +46,7 @@
         /* Ensure all cells in the grid are flexible */
         .fc-theme-standard td {
             min-width: 150px; /* Set minimum width for resource columns */
+            max-width: 300px; /* Set a maximum width to avoid excessively wide columns */
             white-space: normal !important; /* Allow text to wrap */
             word-wrap: break-word; /* Break words that are too long */
         }

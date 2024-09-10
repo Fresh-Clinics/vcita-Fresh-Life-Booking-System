@@ -9,7 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.0/main.min.css" rel="stylesheet">
 
-    <!-- Make sure to include the FullCalendar scripts only once -->
+    <!-- Include FullCalendar JS only once -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.0/main.min.js"></script>
 
@@ -27,10 +27,10 @@
         $(document).ready(function () {
             console.log("Initializing SimplyBook Widget with Providers...");
 
-            // Clear any previous FullCalendar instances if they exist
-            if (typeof FullCalendar !== 'undefined' && FullCalendar.Calendar) {
-                FullCalendar.Calendar.noConflict();
-                console.log("Previous FullCalendar instance cleared.");
+            // Clear any previous FullCalendar instances
+            if ($('#calendar').children().length > 0) {
+                console.log("Destroying previous FullCalendar instance.");
+                $('#calendar').fullCalendar('destroy'); // Clear previous calendar if it exists
             }
 
             // Initialize JSON-RPC Client for SimplyBook API to fetch the token
@@ -180,6 +180,15 @@
             }
 
             function renderCalendar(calendarEl, resources, calendarEvents) {
+                // Destroy any existing FullCalendar instance to avoid duplication
+                if (calendarEl.innerHTML.trim() !== "") {
+                    console.log("Destroying previous FullCalendar instance.");
+                    let existingCalendar = FullCalendar.getCalendar(calendarEl);
+                    if (existingCalendar) {
+                        existingCalendar.destroy();
+                    }
+                }
+
                 var calendar = new FullCalendar.Calendar(calendarEl, {
                     schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
                     initialView: 'resourceTimeGridDay',

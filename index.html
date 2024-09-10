@@ -289,10 +289,25 @@
                 resourceOrder: 'position', // Sort resources by position
                 eventContent: function (arg) {
                     if (arg.event && arg.event.title && arg.event.start && arg.event.end) {
+                        // Format the time to display in Australia/Sydney timezone
+                        const formattedStart = new Intl.DateTimeFormat('en-AU', {
+                            timeZone: 'Australia/Sydney',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        }).format(new Date(arg.event.start));
+
+                        const formattedEnd = new Intl.DateTimeFormat('en-AU', {
+                            timeZone: 'Australia/Sydney',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        }).format(new Date(arg.event.end));
+
                         return {
                             html: `<div class="fc-event-content">
                                       <div class="fc-event-title">${arg.event.title}</div>
-                                      <div class="fc-event-time">${new Date(arg.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} - ${new Date(arg.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</div>
+                                      <div class="fc-event-time">${formattedStart} - ${formattedEnd}</div>
                                    </div>`
                         };
                     } else {

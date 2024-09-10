@@ -63,7 +63,7 @@
                         // Fetch events (services) from SimplyBook.me
                         client.request('getEventList', [], function (events) {
                             if (events) {
-                                console.log("Fetched events:", events);
+                                console.log("Fetched events:", events);  // Log all events to inspect structure
                                 setupFullCalendar(providers, events);
                             } else {
                                 console.error("No events returned. Please check the API response.");
@@ -89,26 +89,27 @@
 
                 // Map events to FullCalendar events
                 var calendarEvents = Object.values(events).map(function (event) {
-                    if (event.unit_map && Object.keys(event.unit_map).length > 0) {
-                        const providerId = Object.keys(event.unit_map)[0];
-                        if (event.start_date && event.end_date) {  // Check for required date fields
-                            return {
-                                title: event.name, 
-                                start: getStartDate(event),  
-                                end: getEndDate(event),      
-                                resourceId: providerId, 
-                                description: event.description || '', 
-                                backgroundColor: '#6b9080', 
-                                borderColor: '#216849'
-                            };
-                        } else {
-                            console.warn("Event missing date information:", event);
-                            return null; 
-                        }
-                    } else {
+                    if (!event.unit_map || Object.keys(event.unit_map).length === 0) {
                         console.warn("Event missing unit_map or provider data:", event);
                         return null; 
                     }
+                    const providerId = Object.keys(event.unit_map)[0];
+                    
+                    if (!event.start_date || !event.end_date) {
+                        console.warn("Event missing date information:", event);
+                        return null; 
+                    }
+
+                    // Return valid event for FullCalendar
+                    return {
+                        title: event.name, 
+                        start: getStartDate(event),  
+                        end: getEndDate(event),      
+                        resourceId: providerId, 
+                        description: event.description || '', 
+                        backgroundColor: '#6b9080', 
+                        borderColor: '#216849'
+                    };
                 }).filter(event => event !== null); 
 
                 console.log("Final Resources for FullCalendar:", resources);
@@ -140,11 +141,21 @@
 
             // Helper functions to convert event times
             function getStartDate(event) {
-                return new Date(event.start_date).toISOString();  // Ensure dates are properly formatted
+                try {
+                    return new Date(event.start_date).toISOString();  // Ensure dates are properly formatted
+                } catch (e) {
+                    console.error("Error formatting start date for event:", event, e);
+                    return null;
+                }
             }
 
             function getEndDate(event) {
-                return new Date(event.end_date).toISOString();  // Ensure dates are properly formatted
+                try {
+                    return new Date(event.end_date).toISOString();  // Ensure dates are properly formatted
+                } catch (e) {
+                    console.error("Error formatting end date for event:", event, e);
+                    return null;
+                }
             }
         });
     </script>

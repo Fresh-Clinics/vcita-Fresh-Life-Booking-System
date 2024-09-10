@@ -125,13 +125,18 @@
 
         function processEventsAndRenderCalendar(providers, events) {
             // Map providers to FullCalendar resources
-            var resources = Object.values(providers).map(function (provider) {
-                if (!provider.id || !provider.name) {
-                    console.warn("Provider missing required fields:", provider);
-                    return null;
-                }
-                return { id: provider.id, title: provider.name };
-            }).filter(resource => resource !== null);
+            var resources = Object.values(providers)
+                .map(function (provider) {
+                    if (!provider.id || !provider.name) {
+                        console.warn("Provider missing required fields:", provider);
+                        return null;
+                    }
+                    return { id: provider.id, title: provider.name };
+                })
+                .filter(resource => resource !== null)
+                .sort(function (a, b) { // Sort resources by ID
+                    return a.id.localeCompare(b.id, undefined, { numeric: true });
+                });
 
             // Map events to FullCalendar events
             var calendarEvents = [];
@@ -167,12 +172,11 @@
         function renderCalendar(resources, calendarEvents) {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                height: 'auto', // enough to activate sticky headers
+                height: 'auto', // enough to active sticky headers
                 dayMinWidth: 200,
                 slotDuration: '00:30:00',
                 schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives', // Include the license key
-                timeZone: 'Australia/Sydney', // Set timezone to AEST
-                locale: 'en-GB', //Set locale to 'en-GB' for DD/MM format
+                timeZone: 'Australia/Sydney', // Set to AEST for Sydney
                 initialView: 'resourceTimeGridDay',
                 initialDate: '2024-10-29', // Set the initial date to October 29, 2024
                 resources: resources,
@@ -186,27 +190,16 @@
                     resourceTimeGridThreeDay: {
                         type: 'resourceTimeGrid',
                         duration: { days: 3 },
-                        buttonText: '3 days',
-                        dayHeaderFormat: { weekday: 'long', day: '2-digit', month: '2-digit' } // Format to DD/MM
+                        buttonText: '3 days'
                     }
                 },
-                slotLabelFormat: { // Customize slot labels for 12-hour format
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-        },
-        eventTimeFormat: { // Customize event times for 12-hour format
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-        },
                 eventContent: function (arg) {
                     // More detailed rendering using a simple check if all required elements are present
                     if (arg.event && arg.event.title && arg.event.start && arg.event.end) {
                         return {
                             html: `<div class="fc-event-content">
                                       <div class="fc-event-title">${arg.event.title}</div>
-                                      <div class="fc-event-time">${new Date(arg.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(arg.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                      <div class="fc-event-time">${new Date(arg.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} - ${new Date(arg.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</div>
                                    </div>`
                         };
                     } else {

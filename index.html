@@ -72,7 +72,7 @@
                             client.request('getEventList', [], function (events) {
                                 if (events) {
                                     console.log("Fetched events:", events);  // Log all events to inspect structure
-                                    setupFullCalendar(providers, events, token, client);
+                                    processEventsAndRenderCalendar(providers, events, token, client);
                                 } else {
                                     console.error("No events returned. Please check the API response.");
                                 }
@@ -90,8 +90,97 @@
                 }
             }
 
-            function setupFullCalendar(providers, events, token, client) {
+            function processEventsAndRenderCalendar(providers, events, token, client) {
                 var calendarEl = document.getElementById('calendar');
 
                 // Map providers to FullCalendar resources
-                var resources = Object.values(providers).map(function
+                var resources = Object.values(providers).map(function (provider) {
+                    if (!provider.id || !provider.name) {
+                        console.warn("Provider missing required fields:", provider);
+                        return null;
+                    }
+                    return { id: provider.id, title: provider.name };
+                }).filter(resource => resource !== null);
+
+                // Map events to FullCalendar events
+                var calendarEvents = [];
+                var totalEventsToFetch = events.length;
+                var processedEvents = 0; // Track processed events to render calendar
+
+                events.forEach(function (event) {
+                    // Ensure unit_map is valid and start and end dates exist
+                    if (!event.unit_map || !event.id) {
+                        console.warn("Event missing required data:", event);
+                        processedEvents++;
+                        return;
+                    }
+
+                    const providerId = event.unit_map; // Assuming unit_map is a provider ID directly
+                    const serviceId = event.id; // Event ID is the service ID
+
+                    // Fetch available start times for this service and provider
+                    client.request('getStartTimeMatrix', ['2024-10-29', '2024-10-30', serviceId, providerId, 1], function (availableTimes) {
+                        if (availableTimes && availableTimes['2024-10-29']) {
+                            availableTimes['2024-10-29'].forEach(function (startTime) {
+                                // Calculate end time based on service duration
+                                client.request('calculateEndTime', [`2024-10-29 ${startTime}`, serviceId, providerId], function (endTime) {
+                                    if (endTime) {
+                                        calendarEvents.push({
+                                            title: event.name,
+                                            start: `2024-10-29T${startTime}`,
+                                            end: endTime,
+                                            resourceId: providerId,
+                                            description: event.description || '',
+                                            backgroundColor: '#6b9080',
+                                            borderColor: '#216849'
+                                        });
+                                    } else {
+                                        console.warn("Unable to calculate end time for event:", event);
+                                    }
+
+                                    processedEvents++;
+                                    if (processedEvents === totalEventsToFetch) {
+                                        // Render the calendar once all events are processed
+                                        renderCalendar(calendarEl, resources, calendarEvents);
+                                    }
+                                });
+                            });
+                        } else {
+                            console.warn("No available times for event:", event);
+                            processedEvents++;
+                            if (processedEvents === totalEventsToFetch) {
+                                renderCalendar(calendarEl, resources, calendarEvents);
+                            }
+                        }
+                    });
+                });
+            }
+
+            function renderCalendar(calendarEl, resources, calendarEvents) {
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+                    initialView: 'resourceTimeGridDay',
+                    initialDate: '2024-10-29',
+                    resources: resources,
+                    events: calendarEvents,
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'resourceTimeGridDay,resourceTimeGridWeek'
+                    },
+                    eventContent: function (arg) {
+                        return {
+                            html: `<div class="fc-event-content">
+                                      <div class="fc-event-title">${arg.event.title}</div>
+                                      <div class="fc-event-time">${new Date(arg.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(arg.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                   </div>`
+                        };
+                    }
+                });
+
+                calendar.render();
+            }
+        });
+    </script>
+</body>
+</html>

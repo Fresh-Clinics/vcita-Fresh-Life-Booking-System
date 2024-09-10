@@ -28,6 +28,7 @@
             height: 100vh; /* Set to full viewport height for visibility */
             margin: 40px auto;
             overflow: auto; /* Enable overflow for scrolling */
+            position: relative; /* Needed for positioning the frozen column */
         }
         .fc .fc-scroller {
             overflow-x: auto !important; /* Enable horizontal scrolling in the calendar */
@@ -48,6 +49,14 @@
         }
         .fc-resource {
             padding: 5px; /* Add some padding around resource titles */
+        }
+        /* Freeze the time grid column on the left */
+        .fc-timegrid-axis {
+            position: sticky;
+            left: 0;
+            z-index: 10; /* Higher z-index to ensure it stays on top */
+            background-color: white; /* Set background to prevent overlap */
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for clarity */
         }
     </style>
 </head>
@@ -214,8 +223,7 @@
                     }
                 },
                 slotMinTime: '06:00:00', // Set the start time of slots to match your schedule
-                slotMaxTime: '20:00:00',  // Set the end time of slots to match your schedule
-                contentHeight: 'auto' // Make sure the height adjusts to content
+                slotMaxTime: '20:00:00'  // Set the end time of slots to match your schedule
             });
 
             calendar.render();

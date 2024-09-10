@@ -15,22 +15,20 @@
     <!-- Include the JSON-RPC Client Script -->
     <script src="json-rpc-client.js"></script>
 
-<style>
+    <style>
+        body {
+            margin: 40px 10px;
+            padding: 0;
+            font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+            font-size: 14px;
+            text-align: center;
+        }
 
-  body {
-    margin: 40px 10px;
-    padding: 0;
-    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-    font-size: 14px;
-    text-align: center;
-  }
-
-  #calendar {
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-
-</style>
+        #calendar {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
 
@@ -169,10 +167,9 @@
         function renderCalendar(resources, calendarEvents) {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                 height: 'auto', // enough to active sticky headers
-      dayMinWidth: 200,
-
-      slotDuration: '00:30:00',
+                height: 'auto', // enough to activate sticky headers
+                dayMinWidth: 200,
+                slotDuration: '00:30:00',
                 schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives', // Include the license key
                 timeZone: 'UTC',
                 initialView: 'resourceTimeGridDay',
@@ -184,13 +181,14 @@
                     center: 'title',
                     right: 'resourceTimeGridDay,resourceTimeGridThreeDay'
                 },
-                      views: {
-        resourceTimeGridThreeDay: {
-          type: 'resourceTimeGrid',
-          duration: { days: 3 },
-          buttonText: '3 days'
-        }
-      },
+                views: {
+                    resourceTimeGridThreeDay: {
+                        type: 'resourceTimeGrid',
+                        duration: { days: 3 },
+                        buttonText: '3 days',
+                        dayHeaderFormat: { day: '2-digit', month: '2-digit' } // Format to DD/MM
+                    }
+                },
                 eventContent: function (arg) {
                     // More detailed rendering using a simple check if all required elements are present
                     if (arg.event && arg.event.title && arg.event.start && arg.event.end) {

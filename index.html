@@ -7,11 +7,12 @@
     <title>SimplyBook.me Scheduler Widget</title>
 
     <!-- Include FullCalendar Scheduler CSS and JS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@6.1.15/index.global.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@6.1.15/index.global.min.js"></script>
 
     <!-- Include jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <!-- Include the JSON-RPC Client Script if needed -->
+    <!-- Include the JSON-RPC Client Script -->
     <script src="json-rpc-client.js"></script>
 
     <style>
@@ -22,8 +23,16 @@
             font-size: 14px;
         }
         #calendar {
-            max-width: 1100px;
+            max-width: 100%;
             margin: 40px auto;
+            overflow-x: auto; /* Enable horizontal scrolling */
+            white-space: nowrap; /* Prevent line breaks between elements */
+        }
+        .fc-scroller {
+            overflow-x: auto !important; /* Force horizontal scrolling in the calendar content */
+        }
+        .fc .fc-col-header-cell {
+            min-width: 150px; /* Adjust this value to control the minimum width of each resource column */
         }
     </style>
 </head>

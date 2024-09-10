@@ -58,7 +58,7 @@
                 if (token) {
                     console.log("Fetched token: ", token);
                     // Once token is fetched, use it to get the list of services and providers
-                    fetchProvidersAndEvents(token);
+                    fetchProvidersAndRenderCalendar(token);
                 } else {
                     console.error("Failed to fetch token. Please check your API credentials.");
                 }
@@ -67,8 +67,8 @@
             console.error("Error initializing JSON-RPC client or fetching token:", e);
         }
 
-        function fetchProvidersAndEvents(token) {
-            console.log("Fetching providers and events...");
+        function fetchProvidersAndRenderCalendar(token) {
+            console.log("Fetching providers...");
             try {
                 var client = new JSONRpcClient({
                     'url': 'https://user-api.simplybook.me',
@@ -85,72 +85,87 @@
                 client.request('getUnitList', [], function (providers) {
                     if (providers) {
                         console.log("Fetched providers:", providers);
-
-                        // Fetch events (services) from SimplyBook.me
-                        client.request('getEventList', [], function (events) {
-                            if (events) {
-                                console.log("Fetched events (raw):", events);  // Log all events to inspect structure
-
-                                // Ensure the events object is correctly handled
-                                if (typeof events === 'object' && !Array.isArray(events)) {
-                                    events = Object.values(events); // Convert to array if it's an object
+                        var resources = Object.values(providers)
+                            .map(function (provider) {
+                                if (!provider.id || !provider.name) {
+                                    console.warn("Provider missing required fields:", provider);
+                                    return null;
                                 }
+                                return {
+                                    id: provider.id,
+                                    title: provider.name,
+                                    position: parseInt(provider.position) || 0, // Ensure position is an integer for sorting
+                                    color: provider.color || '',       // Include color for later use
+                                    picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '', // Include picture path
+                                    description: provider.description || '',  // Include description
+                                };
+                            })
+                            .filter(resource => resource !== null);
 
-                                if (Array.isArray(events) && events.length > 0) {
-                                    processEventsAndRenderCalendar(providers, events, token);
-                                } else {
-                                    console.error("No valid events returned. Please check the API response.");
-                                    renderCalendar([], []); // Render empty calendar
-                                }
-                            } else {
-                                console.error("No events returned. Please check the API response.");
-                                renderCalendar([], []); // Render empty calendar
-                            }
-                        }, function (error) {
-                            console.error("Error fetching events:", error);
-                        });
+                        renderCalendar(resources, token); // Render the calendar after fetching providers
                     } else {
                         console.error("No providers returned. Please check the API response.");
-                        renderCalendar([], []); // Render empty calendar
+                        renderCalendar([], token); // Render empty calendar
                     }
                 }, function (error) {
                     console.error("Error fetching providers:", error);
-                    renderCalendar([], []); // Render empty calendar
+                    renderCalendar([], token); // Render empty calendar
                 });
             } catch (e) {
-                console.error("Error fetching providers or events:", e);
-                renderCalendar([], []); // Render empty calendar
+                console.error("Error fetching providers:", e);
+                renderCalendar([], token); // Render empty calendar
             }
         }
 
-        function processEventsAndRenderCalendar(providers, events, token) {
-            // Map providers to FullCalendar resources, including all fields
-            var resources = Object.values(providers)
-                .map(function (provider) {
-                    if (!provider.id || !provider.name) {
-                        console.warn("Provider missing required fields:", provider);
-                        return null;
-                    }
-                    return {
-                        id: provider.id,
-                        title: provider.name,
-                        position: parseInt(provider.position) || 0, // Ensure position is an integer for sorting
-                        color: provider.color || '',       // Include color for later use
-                        picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '', // Include picture path
-                        description: provider.description || '',  // Include description
-                    };
-                })
-                .filter(resource => resource !== null);
+        function fetchEventsForRange(token, start, end, callback) {
+            var client = new JSONRpcClient({
+                'url': 'https://user-api.simplybook.me',
+                'headers': {
+                    'X-Company-Login': 'thefreshlifeconference',
+                    'X-Token': token
+                },
+                'onerror': function (error) {
+                    console.error("Error in JSON-RPC client setup:", error);
+                }
+            });
 
+            // Fetch events (services) from SimplyBook.me
+            client.request('getEventList', [], function (events) {
+                if (events) {
+                    console.log("Fetched events (raw):", events);  // Log all events to inspect structure
+
+                    // Ensure the events object is correctly handled
+                    if (typeof events === 'object' && !Array.isArray(events)) {
+                        events = Object.values(events); // Convert to array if it's an object
+                    }
+
+                    if (Array.isArray(events) && events.length > 0) {
+                        processEvents(events, token, start, end, callback);
+                    } else {
+                        console.error("No valid events returned. Please check the API response.");
+                        callback([]); // Return empty array if no events
+                    }
+                } else {
+                    console.error("No events returned. Please check the API response.");
+                    callback([]); // Return empty array if no events
+                }
+            }, function (error) {
+                console.error("Error fetching events:", error);
+                callback([]); // Return empty array on error
+            });
+        }
+
+        function processEvents(events, token, start, end, callback) {
             var calendarEvents = [];
-            // Fetch start and end times dynamically using the SimplyBook.me API
+            var processedCount = 0;
+
             events.forEach(function (event) {
                 if (event.unit_map && event.id && event.name) {
                     console.log("Processing event:", event); // Log each event to verify its structure
                     const providerId = Object.keys(event.unit_map)[0]; // Get the provider ID from the unit_map
 
                     // Fetch start time dynamically using getStartTimeMatrix
-                    fetchEventStartTime(token, event.id, providerId, function (startTime) {
+                    fetchEventStartTime(token, event.id, providerId, start, end, function (startTime) {
                         if (startTime) {
                             // Fetch end time dynamically using calculateEndTime
                             fetchEventEndTime(token, startTime, event.id, providerId, function (endTime) {
@@ -164,20 +179,32 @@
                                         resourceId: providerId,  // Resource ID matches provider
                                         description: event.description || '',
                                     });
+                                }
 
-                                    console.log("Processed Events:", calendarEvents); // Log to debug
-                                    renderCalendar(resources, calendarEvents); // Render the calendar after each event is added
+                                // Check if all events are processed
+                                processedCount++;
+                                if (processedCount === events.length) {
+                                    callback(calendarEvents); // Callback with all processed events
                                 }
                             });
+                        } else {
+                            processedCount++;
+                            if (processedCount === events.length) {
+                                callback(calendarEvents); // Callback with all processed events
+                            }
                         }
                     });
                 } else {
                     console.warn("Event missing required data or incorrect format:", event);
+                    processedCount++;
+                    if (processedCount === events.length) {
+                        callback(calendarEvents); // Callback with all processed events
+                    }
                 }
             });
         }
 
-        function fetchEventStartTime(token, eventId, unitId, callback) {
+        function fetchEventStartTime(token, eventId, unitId, from, to, callback) {
             var client = new JSONRpcClient({
                 'url': 'https://user-api.simplybook.me',
                 'headers': {
@@ -188,10 +215,6 @@
                     console.error("Error in JSON-RPC client setup:", error);
                 }
             });
-
-            // Set parameters for fetching start times
-            const from = '2024-10-29'; // Adjust as needed
-            const to = '2024-10-31'; // Adjust as needed
 
             client.request('getStartTimeMatrix', [from, to, eventId, [unitId], 1, null, []], function (timeMatrix) {
                 console.log("Fetched start times for event:", timeMatrix);
@@ -236,7 +259,7 @@
             });
         }
 
-        function renderCalendar(resources, calendarEvents) {
+        function renderCalendar(resources, token) {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 height: 'auto',
@@ -247,7 +270,10 @@
                 initialView: 'resourceTimeGridDay',
                 initialDate: '2024-10-29',
                 resources: resources,
-                events: calendarEvents,
+                events: function (info, successCallback, failureCallback) {
+                    // Fetch events for the current date range
+                    fetchEventsForRange(token, info.startStr, info.endStr, successCallback);
+                },
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',

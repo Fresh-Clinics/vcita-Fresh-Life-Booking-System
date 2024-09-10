@@ -250,7 +250,7 @@
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 height: 'auto',
-                dayMinWidth: 200,
+                dayMinWidth: 100,
                 slotDuration: '00:30:00',
                 schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
                 timeZone: 'Australia/Sydney', // Set timezone to AEST
@@ -264,14 +264,7 @@
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'resourceTimeGridDay,resourceTimeGridThreeDay'
-                },
-                views: {
-                    resourceTimeGridThreeDay: {
-                        type: 'resourceTimeGrid',
-                        duration: { days: 3 },
-                        buttonText: '3 days'
-                    }
+                    right: 'resourceTimeGridDay'
                 },
                 resourceOrder: 'position', // Sort resources by position
                 eventContent: function (arg) {

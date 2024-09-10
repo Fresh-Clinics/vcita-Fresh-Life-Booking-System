@@ -172,6 +172,7 @@
         function renderCalendar(resources, calendarEvents) {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
+                resourceOrder: 'position,name',
                 height: 'auto', // enough to active sticky headers
                 dayMinWidth: 200,
                 slotDuration: '00:30:00',

@@ -1,56 +1,149 @@
-$(document).ready(function () {
-    console.log("Initializing SimplyBook Widget with Providers...");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimplyBook.me Scheduler Widget</title>
+    <!-- Include FullCalendar CSS and JavaScript -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.0/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.0/main.min.js"></script>
 
-    // Initialize JSON-RPC Client for SimplyBook API to fetch the token
-    var loginClient = new JSONRpcClient({
-        'url': 'https://user-api.simplybook.me/login',
-        'onerror': function (error) {
-            console.error("Login Error:", error);
-        }
-    });
+    <!-- Link to External CSS File -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Include jQuery and the JSON-RPC Client Script -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="json-rpc-client.js"></script>
+    
+</head>
+<body>
 
-    // Fetch token dynamically using the SimplyBook API credentials
-    loginClient.getToken('thefreshlifeconference', '5622f213016960fc53a1c61e6ac61aee0eabebcedd688b374f9761c9c6f69dce', function (token) {
-        if (token) {
-            console.log("Fetched token: ", token);
-            // Once token is fetched, use it to get the list of services and providers
-            fetchProvidersAndEvents(token);
-        } else {
-            console.error("Failed to fetch token. Please check your API credentials.");
-        }
-    });
+    <div id="calendar"></div>
 
-    function fetchProvidersAndEvents(token) {
-        console.log("Fetching providers and events...");
-        var client = new JSONRpcClient({
-            'url': 'https://user-api.simplybook.me',
-            'headers': {
-                'X-Company-Login': 'thefreshlifeconference',
-                'X-Token': token
-            }
-        });
+    <script>
+        $(document).ready(function () {
+            console.log("Initializing SimplyBook Widget with Providers...");
 
-        // Fetch providers (units) from SimplyBook.me
-        client.request('getUnitList', [], function (providers) {
-            if (providers) {
-                console.log("Fetched providers:", providers);
-                
-                // Fetch events (services) from SimplyBook.me
-                client.request('getEventList', [], function (events) {
-                    if (events) {
-                        console.log("Fetched events:", events);
-                        setupFullCalendar(providers, events);
+            // Initialize JSON-RPC Client for SimplyBook API to fetch the token
+            var loginClient = new JSONRpcClient({
+                'url': 'https://user-api.simplybook.me/login',
+                'onerror': function (error) {
+                    console.error("Login Error:", error);
+                }
+            });
+
+            // Fetch token dynamically using the SimplyBook API credentials
+            loginClient.getToken('thefreshlifeconference', '5622f213016960fc53a1c61e6ac61aee0eabebcedd688b374f9761c9c6f69dce', function (token) {
+                if (token) {
+                    console.log("Fetched token: ", token);
+                    // Once token is fetched, use it to get the list of services and providers
+                    fetchProvidersAndEvents(token);
+                } else {
+                    console.error("Failed to fetch token. Please check your API credentials.");
+                }
+            });
+
+            function fetchProvidersAndEvents(token) {
+                console.log("Fetching providers and events...");
+                var client = new JSONRpcClient({
+                    'url': 'https://user-api.simplybook.me',
+                    'headers': {
+                        'X-Company-Login': 'thefreshlifeconference',
+                        'X-Token': token
+                    }
+                });
+
+                // Fetch providers (units) from SimplyBook.me
+                client.request('getUnitList', [], function (providers) {
+                    if (providers) {
+                        console.log("Fetched providers:", providers);
+                        
+                        // Fetch events (services) from SimplyBook.me
+                        client.request('getEventList', [], function (events) {
+                            if (events) {
+                                console.log("Fetched events:", events);
+                                setupFullCalendar(providers, events);
+                            } else {
+                                console.error("No events returned. Please check the API response.");
+                            }
+                        }, function (error) {
+                            console.error("Error fetching events:", error);
+                        });
                     } else {
-                        console.error("No events returned. Please check the API response.");
+                        console.error("No providers returned. Please check the API response.");
                     }
                 }, function (error) {
-                    console.error("Error fetching events:", error);
+                    console.error("Error fetching providers:", error);
                 });
-            } else {
-                console.error("No providers returned. Please check the API response.");
             }
-        }, function (error) {
-            console.error("Error fetching providers:", error);
+
+            function setupFullCalendar(providers, events) {
+                var calendarEl = document.getElementById('calendar');
+
+                // Map providers to FullCalendar resources
+                var resources = Object.values(providers).map(function (provider) {
+                    return { id: provider.id, title: provider.name };
+                });
+
+                // Map events to FullCalendar events
+                var calendarEvents = Object.values(events).map(function (event) {
+                    if (event.unit_map && Object.keys(event.unit_map).length > 0) {
+                        const providerId = Object.keys(event.unit_map)[0];
+                        return {
+                            title: event.name, 
+                            start: getStartDate(event),  
+                            end: getEndDate(event),      
+                            resourceId: providerId, 
+                            description: event.description || '', 
+                            backgroundColor: '#6b9080', 
+                            borderColor: '#216849'
+                        };
+                    } else {
+                        console.warn("Event missing required data:", event);
+                        return null; 
+                    }
+                }).filter(event => event !== null); 
+
+                console.log("Resources for FullCalendar:", resources);
+                console.log("Events for FullCalendar:", calendarEvents);
+
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives', 
+                    initialView: 'resourceTimeGridDay', 
+                    initialDate: '2024-10-29',  
+                    resources: resources,
+                    events: calendarEvents,
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'resourceTimeGridDay,resourceTimeGridWeek'
+                    },
+                    eventContent: function (arg) {
+                        return { 
+                            html: `<div class="fc-event-content">
+                                      <div class="fc-event-title">${arg.event.title}</div>
+                                      <div class="fc-event-time">${new Date(arg.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(arg.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                   </div>`
+                        };
+                    }
+                });
+
+                calendar.render();
+            }
+
+            // Helper functions to convert event times
+            function getStartDate(event) {
+                // Replace with actual start time logic
+                return new Date().toISOString();
+            }
+
+            function getEndDate(event) {
+                // Replace with actual end time logic
+                return new Date(new Date().getTime() + 30 * 60000).toISOString(); // Example: 30 minutes after start
+            }
         });
-    }
-});
+    </script>
+</body>
+</html>

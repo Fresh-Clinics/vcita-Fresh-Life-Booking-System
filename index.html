@@ -134,7 +134,7 @@
                     return {
                         id: provider.id,
                         title: provider.name,
-                        position: provider.position || '', // Include position for ordering
+                        position: parseInt(provider.position) || 0, // Ensure position is an integer for sorting
                         color: provider.color || '',       // Include color for later use
                         picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '', // Include picture path
                         description: provider.description || '',  // Include description
@@ -151,10 +151,7 @@
                         station_id: provider.station_id || ''
                     };
                 })
-                .filter(resource => resource !== null)
-                .sort(function (a, b) { // Sort resources by 'position' and 'name'
-                    return a.position - b.position || a.title.localeCompare(b.title);
-                });
+                .filter(resource => resource !== null);
 
             // Map events to FullCalendar events
             var calendarEvents = [];
@@ -169,12 +166,12 @@
                     console.log(`Processing Event: ${event.name}, Start: ${eventStart}, End: ${eventEnd}, Resource: ${providerId}`);
                     
                     calendarEvents.push({
-                title: event.name,
-                start: "2024-10-30T09:00:00", // Ensure start is in ISO format
-                end: "2024-10-30T11:00:00", // Ensure end is in ISO format
-                resourceId: 15, // Resource ID matches provider
-                description: event.description || "",
-              });
+                        title: event.name,
+                        start: eventStart,  // Ensure start is in ISO format
+                        end: eventEnd,      // Ensure end is in ISO format
+                        resourceId: providerId,  // Resource ID matches provider
+                        description: event.description || ''
+                    });
                 } else {
                     console.warn("Event missing required data:", event);
                 }
@@ -212,6 +209,7 @@
                          buttonText: '3 days'
                      }
                  },
+                 resourceOrder: 'position', // Set resourceOrder to 'position' to sort by position field
                  eventContent: function (arg) {
                      // More detailed rendering using a simple check if all required elements are present
                      if (arg.event && arg.event.title && arg.event.start && arg.event.end) {

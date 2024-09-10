@@ -91,17 +91,22 @@
                 var calendarEvents = Object.values(events).map(function (event) {
                     if (event.unit_map && Object.keys(event.unit_map).length > 0) {
                         const providerId = Object.keys(event.unit_map)[0];
-                        return {
-                            title: event.name, 
-                            start: getStartDate(event),  
-                            end: getEndDate(event),      
-                            resourceId: providerId, 
-                            description: event.description || '', 
-                            backgroundColor: '#6b9080', 
-                            borderColor: '#216849'
-                        };
+                        if (event.start_date && event.end_date) {  // Check for required date fields
+                            return {
+                                title: event.name, 
+                                start: getStartDate(event),  
+                                end: getEndDate(event),      
+                                resourceId: providerId, 
+                                description: event.description || '', 
+                                backgroundColor: '#6b9080', 
+                                borderColor: '#216849'
+                            };
+                        } else {
+                            console.warn("Event missing date information:", event);
+                            return null; 
+                        }
                     } else {
-                        console.warn("Event missing required data:", event);
+                        console.warn("Event missing unit_map or provider data:", event);
                         return null; 
                     }
                 }).filter(event => event !== null); 
@@ -135,13 +140,11 @@
 
             // Helper functions to convert event times
             function getStartDate(event) {
-                // Replace this with actual start date logic
-                return event.start_date;  // Assuming your event object has a `start_date` property
+                return new Date(event.start_date).toISOString();  // Ensure dates are properly formatted
             }
 
             function getEndDate(event) {
-                // Replace this with actual end date logic
-                return event.end_date;  // Assuming your event object has an `end_date` property
+                return new Date(event.end_date).toISOString();  // Ensure dates are properly formatted
             }
         });
     </script>

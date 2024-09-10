@@ -32,10 +32,15 @@
         .fc .fc-scroller {
             overflow-x: auto !important; /* Enable horizontal scrolling in the calendar */
         }
-        .fc-col-header-cell, .fc-datagrid-cell-frame {
+        /* Override table layout to allow dynamic column width */
+        .fc .fc-scrollgrid {
+            table-layout: auto !important; /* Set to auto to allow dynamic width */
+        }
+        /* Ensure all cells in the grid are flexible */
+        .fc-theme-standard td {
+            min-width: 150px; /* Set minimum width for resource columns */
             white-space: normal !important; /* Allow text to wrap */
             word-wrap: break-word; /* Break words that are too long */
-            min-width: 150px; /* Set minimum width for resource columns */
         }
         .fc-datagrid-cell-frame {
             max-width: 200px; /* Adjust the maximum width as needed */

@@ -90,18 +90,18 @@
                         client.request('getEventList', [], function (events) {
                             if (events) {
                                 console.log("Fetched events:", events);  // Log all events to inspect structure
-                                
-                                // Convert events object to array if necessary
-                                if (typeof events === 'object') {
+
+                                // Ensure the events object is correctly handled
+                                if (typeof events === 'object' && !Array.isArray(events)) {
                                     events = Object.values(events); // Convert to array if it's an object
                                 }
 
-                                if (!Array.isArray(events)) {
-                                    console.error("Expected events to be an array but got:", typeof events);
-                                    return;
+                                if (Array.isArray(events) && events.length > 0) {
+                                    processEventsAndRenderCalendar(providers, events);
+                                } else {
+                                    console.error("No valid events returned. Please check the API response.");
+                                    renderCalendar([], []); // Render empty calendar
                                 }
-
-                                processEventsAndRenderCalendar(providers, events);
                             } else {
                                 console.error("No events returned. Please check the API response.");
                                 renderCalendar([], []); // Render empty calendar
@@ -154,7 +154,7 @@
                 .filter(resource => resource !== null);
 
             // Map events to FullCalendar events, including all fields
-            var calendarEvents = Object.values(events).map(function (event) {
+            var calendarEvents = events.map(function (event) {
                 if (event.unit_map && event.id && event.name && event.start && event.end) {
                     const providerId = Object.keys(event.unit_map)[0]; // Get the provider ID from the unit_map
                     const eventStart = new Date(event.start).toISOString();
@@ -217,8 +217,8 @@
                 dayMinWidth: 200,
                 slotDuration: '00:30:00',
                 schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives', // Include the license key
-                timeZone: 'Australia/Sydney',
-                locale: 'en-AU',
+                timeZone: 'Australia/Sydney', // Set the time zone to AEST
+                locale: 'en-au', // Set locale to Australia
                 initialView: 'resourceTimeGridDay',
                 initialDate: '2024-10-29', // Set the initial date to October 29, 2024
                 resources: resources,

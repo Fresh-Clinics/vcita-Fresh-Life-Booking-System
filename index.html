@@ -27,56 +27,67 @@
             console.log("Initializing SimplyBook Widget with Providers...");
 
             // Initialize JSON-RPC Client for SimplyBook API to fetch the token
-            var loginClient = new JSONRpcClient({
-                'url': 'https://user-api.simplybook.me/login',
-                'onerror': function (error) {
-                    console.error("Login Error:", error);
-                }
-            });
+            try {
+                var loginClient = new JSONRpcClient({
+                    'url': 'https://user-api.simplybook.me/login',
+                    'onerror': function (error) {
+                        console.error("Login Error:", error);
+                    }
+                });
 
-            // Fetch token dynamically using the SimplyBook API credentials
-            loginClient.getToken('thefreshlifeconference', '5622f213016960fc53a1c61e6ac61aee0eabebcedd688b374f9761c9c6f69dce', function (token) {
-                if (token) {
-                    console.log("Fetched token: ", token);
-                    // Once token is fetched, use it to get the list of services and providers
-                    fetchProvidersAndEvents(token);
-                } else {
-                    console.error("Failed to fetch token. Please check your API credentials.");
-                }
-            });
+                // Fetch token dynamically using the SimplyBook API credentials
+                loginClient.getToken('thefreshlifeconference', '5622f213016960fc53a1c61e6ac61aee0eabebcedd688b374f9761c9c6f69dce', function (token) {
+                    if (token) {
+                        console.log("Fetched token: ", token);
+                        // Once token is fetched, use it to get the list of services and providers
+                        fetchProvidersAndEvents(token);
+                    } else {
+                        console.error("Failed to fetch token. Please check your API credentials.");
+                    }
+                });
+            } catch (e) {
+                console.error("Error initializing JSON-RPC client or fetching token:", e);
+            }
 
             function fetchProvidersAndEvents(token) {
                 console.log("Fetching providers and events...");
-                var client = new JSONRpcClient({
-                    'url': 'https://user-api.simplybook.me',
-                    'headers': {
-                        'X-Company-Login': 'thefreshlifeconference',
-                        'X-Token': token
-                    }
-                });
+                try {
+                    var client = new JSONRpcClient({
+                        'url': 'https://user-api.simplybook.me',
+                        'headers': {
+                            'X-Company-Login': 'thefreshlifeconference',
+                            'X-Token': token
+                        },
+                        'onerror': function (error) {
+                            console.error("Error in JSON-RPC client setup:", error);
+                        }
+                    });
 
-                // Fetch providers (units) from SimplyBook.me
-                client.request('getUnitList', [], function (providers) {
-                    if (providers) {
-                        console.log("Fetched providers:", providers);
-                        
-                        // Fetch events (services) from SimplyBook.me
-                        client.request('getEventList', [], function (events) {
-                            if (events) {
-                                console.log("Fetched events:", events);  // Log all events to inspect structure
-                                setupFullCalendar(providers, events);
-                            } else {
-                                console.error("No events returned. Please check the API response.");
-                            }
-                        }, function (error) {
-                            console.error("Error fetching events:", error);
-                        });
-                    } else {
-                        console.error("No providers returned. Please check the API response.");
-                    }
-                }, function (error) {
-                    console.error("Error fetching providers:", error);
-                });
+                    // Fetch providers (units) from SimplyBook.me
+                    client.request('getUnitList', [], function (providers) {
+                        if (providers) {
+                            console.log("Fetched providers:", providers);
+
+                            // Fetch events (services) from SimplyBook.me
+                            client.request('getEventList', [], function (events) {
+                                if (events) {
+                                    console.log("Fetched events:", events);  // Log all events to inspect structure
+                                    setupFullCalendar(providers, events);
+                                } else {
+                                    console.error("No events returned. Please check the API response.");
+                                }
+                            }, function (error) {
+                                console.error("Error fetching events:", error);
+                            });
+                        } else {
+                            console.error("No providers returned. Please check the API response.");
+                        }
+                    }, function (error) {
+                        console.error("Error fetching providers:", error);
+                    });
+                } catch (e) {
+                    console.error("Error fetching providers or events:", e);
+                }
             }
 
             function setupFullCalendar(providers, events) {

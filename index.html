@@ -24,18 +24,21 @@
             overflow-x: hidden; /* Prevent body from scrolling */
         }
         #calendar {
-            max-width: 100%;
+            width: 100%;
+            height: 100vh; /* Set to full viewport height for visibility */
             margin: 40px auto;
+            overflow: auto; /* Enable overflow for scrolling */
         }
         .fc .fc-scroller {
             overflow-x: auto !important; /* Enable horizontal scrolling in the calendar */
         }
-        .fc .fc-datagrid-cell-frame {
+        .fc-col-header-cell, .fc-datagrid-cell-frame {
             white-space: normal !important; /* Allow text to wrap */
             word-wrap: break-word; /* Break words that are too long */
+            min-width: 150px; /* Set minimum width for resource columns */
         }
         .fc-datagrid-cell-frame {
-            max-width: 150px; /* Adjust the width as needed */
+            max-width: 200px; /* Adjust the maximum width as needed */
             overflow: hidden; /* Hide any overflowing text */
         }
         .fc-resource {
@@ -206,7 +209,8 @@
                     }
                 },
                 slotMinTime: '06:00:00', // Set the start time of slots to match your schedule
-                slotMaxTime: '20:00:00'  // Set the end time of slots to match your schedule
+                slotMaxTime: '20:00:00',  // Set the end time of slots to match your schedule
+                contentHeight: 'auto' // Make sure the height adjusts to content
             });
 
             calendar.render();

@@ -106,8 +106,8 @@
                     }
                 }).filter(event => event !== null); 
 
-                console.log("Resources for FullCalendar:", resources);
-                console.log("Events for FullCalendar:", calendarEvents);
+                console.log("Final Resources for FullCalendar:", resources);
+                console.log("Final Events for FullCalendar:", calendarEvents);
 
                 var calendar = new FullCalendar.Calendar(calendarEl, {
                     schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives', 
@@ -135,13 +135,13 @@
 
             // Helper functions to convert event times
             function getStartDate(event) {
-                // Replace with actual start time logic
-                return new Date().toISOString();
+                // Replace this with actual start date logic
+                return event.start_date;  // Assuming your event object has a `start_date` property
             }
 
             function getEndDate(event) {
-                // Replace with actual end time logic
-                return new Date(new Date().getTime() + 30 * 60000).toISOString(); // Example: 30 minutes after start
+                // Replace this with actual end date logic
+                return event.end_date;  // Assuming your event object has an `end_date` property
             }
         });
     </script>

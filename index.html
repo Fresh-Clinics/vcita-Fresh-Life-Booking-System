@@ -12,11 +12,12 @@
 
     <!-- Include jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
     <!-- Include the JSON-RPC Client Script -->
     <script src="json-rpc-client.js"></script>
 
-    <!-- Include Tippy.js for Tooltips -->
-    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css">
+    <!-- Include Tippy.js for tooltips -->
+    <link href="https://unpkg.com/tippy.js@6/dist/tippy.css" rel="stylesheet">
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
 
@@ -34,10 +35,112 @@
             margin: 0 auto;
         }
 
-        /* Tooltip Styling */
-        .tippy-box[data-theme~='light'] {
-            background-color: #FFC107;
+        .popper,
+        .tooltip {
+            position: absolute;
+            z-index: 9999;
+            background: #FFC107;
             color: black;
+            width: 150px;
+            border-radius: 3px;
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            text-align: center;
+        }
+
+        .style5 .tooltip {
+            background: #1E252B;
+            color: #FFFFFF;
+            max-width: 200px;
+            width: auto;
+            font-size: .8rem;
+            padding: .5em 1em;
+        }
+
+        .popper .popper__arrow,
+        .tooltip .tooltip-arrow {
+            width: 0;
+            height: 0;
+            border-style: solid;
+            position: absolute;
+            margin: 5px;
+        }
+
+        .tooltip .tooltip-arrow,
+        .popper .popper__arrow {
+            border-color: #FFC107;
+        }
+
+        .style5 .tooltip .tooltip-arrow {
+            border-color: #1E252B;
+        }
+
+        .popper[x-placement^="top"],
+        .tooltip[x-placement^="top"] {
+            margin-bottom: 5px;
+        }
+
+        .popper[x-placement^="top"] .popper__arrow,
+        .tooltip[x-placement^="top"] .tooltip-arrow {
+            border-width: 5px 5px 0 5px;
+            border-left-color: transparent;
+            border-right-color: transparent;
+            border-bottom-color: transparent;
+            bottom: -5px;
+            left: calc(50% - 5px);
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        .popper[x-placement^="bottom"],
+        .tooltip[x-placement^="bottom"] {
+            margin-top: 5px;
+        }
+
+        .tooltip[x-placement^="bottom"] .tooltip-arrow,
+        .popper[x-placement^="bottom"] .popper__arrow {
+            border-width: 0 5px 5px 5px;
+            border-left-color: transparent;
+            border-right-color: transparent;
+            border-top-color: transparent;
+            top: -5px;
+            left: calc(50% - 5px);
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        .tooltip[x-placement^="right"],
+        .popper[x-placement^="right"] {
+            margin-left: 5px;
+        }
+
+        .popper[x-placement^="right"] .popper__arrow,
+        .tooltip[x-placement^="right"] .tooltip-arrow {
+            border-width: 5px 5px 5px 0;
+            border-left-color: transparent;
+            border-top-color: transparent;
+            border-bottom-color: transparent;
+            left: -5px;
+            top: calc(50% - 5px);
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .popper[x-placement^="left"],
+        .tooltip[x-placement^="left"] {
+            margin-right: 5px;
+        }
+
+        .popper[x-placement^="left"] .popper__arrow,
+        .tooltip[x-placement^="left"] .tooltip-arrow {
+            border-width: 5px 0 5px 5px;
+            border-top-color: transparent;
+            border-right-color: transparent;
+            border-bottom-color: transparent;
+            right: -5px;
+            top: calc(50% - 5px);
+            margin-left: 0;
+            margin-right: 0;
         }
     </style>
 </head>
@@ -48,6 +151,12 @@
 <script>
     $(document).ready(function () {
         console.log("Initializing SimplyBook Widget with Providers...");
+
+        // Ensure no previous calendar instance exists
+        if ($('#calendar').children().length > 0) {
+            console.log("Clearing previous FullCalendar instance.");
+            $('#calendar').empty(); // Clear previous calendar if it exists
+        }
 
         // Initialize JSON-RPC Client for SimplyBook API to fetch the token
         try {
@@ -62,7 +171,7 @@
             loginClient.getToken('thefreshlifeconference', '5622f213016960fc53a1c61e6ac61aee0eabebcedd688b374f9761c9c6f69dce', function (token) {
                 if (token) {
                     console.log("Fetched token: ", token);
-                    // Fetch providers and then render the calendar with the token
+                    // Once token is fetched, use it to get the list of services and providers
                     fetchProvidersAndRenderCalendar(token);
                 } else {
                     console.error("Failed to fetch token. Please check your API credentials.");
@@ -74,177 +183,48 @@
 
         function fetchProvidersAndRenderCalendar(token) {
             console.log("Fetching providers...");
-            var client = new JSONRpcClient({
-                'url': 'https://user-api.simplybook.me',
-                'headers': {
-                    'X-Company-Login': 'thefreshlifeconference',
-                    'X-Token': token
-                },
-                'onerror': function (error) {
-                    console.error("Error in JSON-RPC client setup:", error);
-                }
-            });
-
-            // Fetch providers (units) from SimplyBook.me
-            client.request('getUnitList', [], function (providers) {
-                if (providers) {
-                    console.log("Fetched providers:", providers);
-                    var resources = Object.values(providers).map(provider => ({
-                        id: provider.id,
-                        title: provider.name,
-                        position: parseInt(provider.position) || 0,
-                        color: provider.color || '',
-                        picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '',
-                        description: provider.description || ''
-                    }));
-
-                    renderCalendar(resources, token);
-                } else {
-                    console.error("No providers returned. Please check the API response.");
-                    renderCalendar([], token); // Render empty calendar
-                }
-            }, function (error) {
-                console.error("Error fetching providers:", error);
-                renderCalendar([], token); // Render empty calendar
-            });
-        }
-
-        function fetchEventsForRange(token, start, end, callback) {
-            var client = new JSONRpcClient({
-                'url': 'https://user-api.simplybook.me',
-                'headers': {
-                    'X-Company-Login': 'thefreshlifeconference',
-                    'X-Token': token
-                },
-                'onerror': function (error) {
-                    console.error("Error in JSON-RPC client setup:", error);
-                }
-            });
-
-            // Fetch events (services) from SimplyBook.me
-            client.request('getEventList', [], function (events) {
-                if (events) {
-                    console.log("Fetched events (raw):", events);
-
-                    // Ensure the events object is correctly handled
-                    if (typeof events === 'object' && !Array.isArray(events)) {
-                        events = Object.values(events); // Convert to array if it's an object
+            try {
+                var client = new JSONRpcClient({
+                    'url': 'https://user-api.simplybook.me',
+                    'headers': {
+                        'X-Company-Login': 'thefreshlifeconference',
+                        'X-Token': token
+                    },
+                    'onerror': function (error) {
+                        console.error("Error in JSON-RPC client setup:", error);
                     }
+                });
 
-                    if (Array.isArray(events) && events.length > 0) {
-                        processEvents(events, token, start, end, callback);
+                // Fetch providers (units) from SimplyBook.me
+                client.request('getUnitList', [], function (providers) {
+                    if (providers) {
+                        console.log("Fetched providers:", providers);
+
+                        // Process the providers and render the calendar
+                        var resources = Object.values(providers).map(function (provider) {
+                            return {
+                                id: provider.id,
+                                title: provider.name,
+                                position: parseInt(provider.position) || 0,
+                                color: provider.color || '',
+                                picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '',
+                                description: provider.description || '',
+                            };
+                        }).sort((a, b) => a.position - b.position);
+
+                        renderCalendar(resources, token);
                     } else {
-                        console.error("No valid events returned. Please check the API response.");
-                        callback([]); // Return empty array if no events
+                        console.error("No providers returned. Please check the API response.");
+                        renderCalendar([], token); // Render empty calendar
                     }
-                } else {
-                    console.error("No events returned. Please check the API response.");
-                    callback([]); // Return empty array if no events
-                }
-            }, function (error) {
-                console.error("Error fetching events:", error);
-                callback([]); // Return empty array on error
-            });
-        }
-
-        function processEvents(events, token, start, end, callback) {
-            var calendarEvents = [];
-            var processedCount = 0;
-
-            events.forEach(function (event) {
-                if (event.unit_map && event.id && event.name) {
-                    console.log("Processing event:", event); // Log each event to verify its structure
-                    const providerId = Object.keys(event.unit_map)[0]; // Get the provider ID from the unit_map
-
-                    fetchEventStartTime(token, event.id, providerId, start, end, function (startTime) {
-                        if (startTime) {
-                            fetchEventEndTime(token, startTime, event.id, providerId, function (endTime) {
-                                if (endTime) {
-                                    // Push the event into the calendarEvents array
-                                    calendarEvents.push({
-                                        id: event.id,
-                                        title: event.name,
-                                        start: startTime,  // Dynamic start time
-                                        end: endTime,      // Dynamic end time
-                                        resourceId: providerId,  // Resource ID matches provider
-                                        description: event.description || '',
-                                    });
-                                }
-                                processedCount++;
-                                if (processedCount === events.length) {
-                                    callback(calendarEvents);
-                                }
-                            });
-                        } else {
-                            processedCount++;
-                            if (processedCount === events.length) {
-                                callback(calendarEvents);
-                            }
-                        }
-                    });
-                } else {
-                    console.warn("Event missing required data or incorrect format:", event);
-                    processedCount++;
-                    if (processedCount === events.length) {
-                        callback(calendarEvents);
-                    }
-                }
-            });
-        }
-
-        function fetchEventStartTime(token, eventId, unitId, from, to, callback) {
-            var client = new JSONRpcClient({
-                'url': 'https://user-api.simplybook.me',
-                'headers': {
-                    'X-Company-Login': 'thefreshlifeconference',
-                    'X-Token': token
-                },
-                'onerror': function (error) {
-                    console.error("Error in JSON-RPC client setup:", error);
-                }
-            });
-
-            client.request('getStartTimeMatrix', [from, to, eventId, [unitId], 1, null, []], function (timeMatrix) {
-                console.log("Fetched start times for event:", timeMatrix);
-                if (timeMatrix && Object.keys(timeMatrix).length > 0) {
-                    const firstDate = Object.keys(timeMatrix)[0]; // Get the first available date
-                    const startTime = timeMatrix[firstDate][0];   // Get the first available time
-                    const fullStartTime = `${firstDate}T${startTime}`; // Combine to full ISO date-time string
-                    callback(fullStartTime);
-                } else {
-                    console.error("No start time available for the given parameters.");
-                    callback(null);
-                }
-            }, function (error) {
-                console.error("Error fetching start times:", error);
-                callback(null);
-            });
-        }
-
-        function fetchEventEndTime(token, startDateTime, eventId, unitId, callback) {
-            var client = new JSONRpcClient({
-                'url': 'https://user-api.simplybook.me',
-                'headers': {
-                    'X-Company-Login': 'thefreshlifeconference',
-                    'X-Token': token
-                },
-                'onerror': function (error) {
-                    console.error("Error in JSON-RPC client setup:", error);
-                }
-            });
-
-            client.request('calculateEndTime', [startDateTime, eventId, unitId, []], function (endTime) {
-                console.log("Fetched end time for event:", endTime);
-                if (endTime) {
-                    callback(endTime);
-                } else {
-                    console.error("No end time available for the given parameters.");
-                    callback(null);
-                }
-            }, function (error) {
-                console.error("Error fetching end time:", error);
-                callback(null);
-            });
+                }, function (error) {
+                    console.error("Error fetching providers:", error);
+                    renderCalendar([], token); // Render empty calendar
+                });
+            } catch (e) {
+                console.error("Error fetching providers or events:", e);
+                renderCalendar([], token); // Render empty calendar
+            }
         }
 
         function renderCalendar(resources, token) {
@@ -263,14 +243,25 @@
                     fetchEventsForRange(token, info.startStr, info.endStr, successCallback);
                 },
                 headerToolbar: {
-                    left: 'prev',
+                    left: 'prev,next today',
                     center: 'title',
-                    right: 'next'
+                    right: 'resourceTimeGridDay,resourceTimeGridThreeDay'
+                },
+                views: {
+                    resourceTimeGridThreeDay: {
+                        type: 'resourceTimeGrid',
+                        duration: { days: 3 },
+                        buttonText: '3 days'
+                    }
                 },
                 resourceOrder: 'position', // Sort resources by position
                 eventDidMount: function (info) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = info.event.extendedProps.description;
+
                     tippy(info.el, {
-                        content: info.event.extendedProps.description,
+                        content: tempDiv.innerHTML,
+                        allowHTML: true,
                         theme: 'light',
                         placement: 'top'
                     });
@@ -281,6 +272,13 @@
 
             calendar.render();
             console.log("Calendar rendered with events.");
+        }
+
+        function fetchEventsForRange(token, startStr, endStr, successCallback) {
+            // Implement fetching of events within the specified range and call successCallback
+            console.log("Fetching events between:", startStr, "and", endStr);
+            // Example success callback with empty events array
+            successCallback([]);
         }
     });
 </script>

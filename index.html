@@ -364,16 +364,9 @@
                     fetchEventsForRange(token, info.startStr, info.endStr, successCallback);
                 },
                 headerToolbar: {
-                    left: 'prev,next today',
+                    left: 'prev',
                     center: 'title',
-                    right: 'resourceTimeGridDay,resourceTimeGridThreeDay'
-                },
-                views: {
-                    resourceTimeGridThreeDay: {
-                        type: 'resourceTimeGrid',
-                        duration: { days: 3 },
-                        buttonText: '3 days'
-                    }
+                    right: 'next'
                 },
                 resourceOrder: 'position', // Sort resources by position
                 eventDidMount: function (info) {

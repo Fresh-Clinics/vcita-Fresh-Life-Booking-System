@@ -5,16 +5,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SimplyBook.me Scheduler Widget</title>
-    <!-- Include FullCalendar CSS and JavaScript -->
+
+    <!-- Include FullCalendar Scheduler CSS (if not included elsewhere) -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.0/main.min.css" rel="stylesheet">
 
-    <!-- Ensure FullCalendar scripts are included only once -->
+    <!-- Include FullCalendar Scheduler JS (if not included elsewhere) -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.0/main.min.js"></script>
 
-    <!-- Link to External CSS File -->
-    <link rel="stylesheet" href="styles.css">
-    <!-- Include jQuery and the JSON-RPC Client Script -->
+    <!-- Include jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Include the JSON-RPC Client Script if needed -->
     <script src="json-rpc-client.js"></script>
 </head>
 <body>
@@ -25,11 +25,29 @@
         $(document).ready(function () {
             console.log("Initializing SimplyBook Widget with Providers...");
 
-            // Destroy any existing FullCalendar instances properly
+            // Ensure no previous calendar instance exists
             if ($('#calendar').children().length > 0) {
-                console.log("Destroying previous FullCalendar instance.");
+                console.log("Clearing previous FullCalendar instance.");
                 $('#calendar').empty(); // Clear previous calendar if it exists
             }
+
+            // Example hardcoded data to verify if calendar renders properly
+            const hardcodedEvents = [
+                {
+                    title: 'Sample Event',
+                    start: '2024-10-29T10:00:00',
+                    end: '2024-10-29T12:00:00',
+                    resourceId: '1', // Example resource ID
+                    description: 'This is a hardcoded sample event.'
+                }
+            ];
+
+            const hardcodedResources = [
+                { id: '1', title: 'Sample Resource' }
+            ];
+
+            // Render the calendar with hardcoded data to check if it works
+            renderCalendar(hardcodedResources, hardcodedEvents);
 
             // Initialize JSON-RPC Client for SimplyBook API to fetch the token
             try {
@@ -111,8 +129,6 @@
             }
 
             function processEventsAndRenderCalendar(providers, events, token, client) {
-                var calendarEl = document.getElementById('calendar');
-
                 // Map providers to FullCalendar resources
                 var resources = Object.values(providers).map(function (provider) {
                     if (!provider.id || !provider.name) {
@@ -124,63 +140,33 @@
 
                 // Map events to FullCalendar events
                 var calendarEvents = [];
-                var promises = []; // To handle asynchronous calls
-
                 events.forEach(function (event) {
-                    // Ensure unit_map is valid and start and end dates exist
-                    if (!event.unit_map || !event.id || !event.name || !event.duration) {
-                        console.warn("Event missing required data:", event);
-                        return; // Skip invalid events
-                    }
-
-                    const providerId = event.unit_map; // Assuming unit_map is a provider ID directly
-                    const serviceId = event.id; // Event ID is the service ID
-
-                    // Fetch available start times for this service and provider
-                    let promise = new Promise((resolve, reject) => {
-                        client.request('getStartTimeMatrix', ['2024-10-29', '2024-10-30', serviceId, providerId, 1], function (availableTimes) {
-                            if (availableTimes && availableTimes['2024-10-29']) {
-                                availableTimes['2024-10-29'].forEach(function (startTime) {
-                                    // Calculate end time based on service duration
-                                    client.request('calculateEndTime', [`2024-10-29 ${startTime}`, serviceId, providerId], function (endTime) {
-                                        if (endTime) {
-                                            calendarEvents.push({
-                                                title: event.name,
-                                                start: `2024-10-29T${startTime}`,
-                                                end: endTime,
-                                                resourceId: providerId,
-                                                description: event.description || '',
-                                                backgroundColor: '#6b9080',
-                                                borderColor: '#216849'
-                                            });
-                                        } else {
-                                            console.warn("Unable to calculate end time for event:", event);
-                                        }
-                                        resolve();
-                                    });
-                                });
-                            } else {
-                                console.warn("No available times for event:", event);
-                                resolve();
-                            }
+                    if (event.unit_map && event.id && event.name && event.duration) {
+                        const providerId = event.unit_map; // Assuming unit_map is a provider ID directly
+                        const serviceId = event.id; // Event ID is the service ID
+                        calendarEvents.push({
+                            title: event.name,
+                            start: '2024-10-29T10:00:00', // Use sample start/end time for debugging
+                            end: '2024-10-29T11:00:00',
+                            resourceId: providerId,
+                            description: event.description || ''
                         });
-                    });
-                    promises.push(promise);
+                    } else {
+                        console.warn("Event missing required data:", event);
+                    }
                 });
 
-                Promise.all(promises).then(() => {
-                    // Render the calendar once all events are processed
-                    renderCalendar(calendarEl, resources, calendarEvents);
-                }).catch(error => {
-                    console.error("Error processing events:", error);
-                    renderCalendar(calendarEl, resources, []); // Render calendar even if there's an error
-                });
+                console.log("Processed Resources:", resources);
+                console.log("Processed Events:", calendarEvents);
+
+                // Render the calendar with fetched data
+                renderCalendar(resources, calendarEvents);
             }
 
-            function renderCalendar(calendarEl, resources, calendarEvents) {
-                // Destroy any existing FullCalendar instance to avoid duplication
+            function renderCalendar(resources, calendarEvents) {
                 $('#calendar').empty(); // Clear the calendar container
 
+                var calendarEl = document.getElementById('calendar');
                 var calendar = new FullCalendar.Calendar(calendarEl, {
                     schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
                     initialView: 'resourceTimeGridDay',
@@ -203,6 +189,7 @@
                 });
 
                 calendar.render();
+                console.log("Calendar rendered with events.");
             }
         });
     </script>

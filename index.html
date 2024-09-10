@@ -134,21 +134,19 @@
             var calendarEvents = [];
             events.forEach(function (event) {
                 // Ensure each event has the required fields before processing
-                if (event.unit_map && event.id && event.name && event.duration) {
+                if (event.unit_map && event.id && event.name && event.start && event.end) {
                     const providerId = event.unit_map; // Assuming unit_map is a provider ID directly
                     calendarEvents.push({
                         title: event.name,
-                        start: '2024-10-29T10:00:00+00:00', // Use sample start/end time for debugging
-                        end: '2024-10-29T11:00:00+00:00',
-                        resourceId: providerId,
+                        start: new Date(event.start).toISOString(),  // Ensure start is in ISO format
+                        end: new Date(event.end).toISOString(),      // Ensure end is in ISO format
+                        resourceId: providerId,                      // Resource ID matches provider
                         description: event.description || ''
                     });
                 } else {
                     console.warn("Event missing required data:", event);
                 }
             });
-
-            
 
             console.log("Processed Resources:", resources);
             console.log("Processed Events:", calendarEvents);
@@ -171,12 +169,18 @@
                     right: 'resourceTimeGridDay,resourceTimeGridWeek'
                 },
                 eventContent: function (arg) {
-                    return {
-                        html: `<div class="fc-event-content">
-                                  <div class="fc-event-title">${arg.event.title}</div>
-                                  <div class="fc-event-time">${new Date(arg.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(arg.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                               </div>`
-                    };
+                    // More detailed rendering using a simple check if all required elements are present
+                    if (arg.event && arg.event.title && arg.event.start && arg.event.end) {
+                        return {
+                            html: `<div class="fc-event-content">
+                                      <div class="fc-event-title">${arg.event.title}</div>
+                                      <div class="fc-event-time">${new Date(arg.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(arg.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                   </div>`
+                        };
+                    } else {
+                        console.warn("Event data is missing or incorrect", arg.event);
+                        return { html: '<div class="fc-event-content"><div class="fc-event-title">Invalid Event</div></div>' };
+                    }
                 }
             });
 

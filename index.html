@@ -98,25 +98,25 @@
                                     return;
                                 }
 
-                                processEventsAndRenderCalendar(providers, events, token, client);
+                                processEventsAndRenderCalendar(providers, events);
                             } else {
                                 console.error("No events returned. Please check the API response.");
-                                renderCalendar(document.getElementById('calendar'), [], []); // Render empty calendar
+                                renderCalendar([], []); // Render empty calendar
                             }
                         }, function (error) {
                             console.error("Error fetching events:", error);
                         });
                     } else {
                         console.error("No providers returned. Please check the API response.");
-                        renderCalendar(document.getElementById('calendar'), [], []); // Render empty calendar
+                        renderCalendar([], []); // Render empty calendar
                     }
                 }, function (error) {
                     console.error("Error fetching providers:", error);
-                    renderCalendar(document.getElementById('calendar'), [], []); // Render empty calendar
+                    renderCalendar([], []); // Render empty calendar
                 });
             } catch (e) {
                 console.error("Error fetching providers or events:", e);
-                renderCalendar(document.getElementById('calendar'), [], []); // Render empty calendar
+                renderCalendar([], []); // Render empty calendar
             }
         }
 
@@ -136,11 +136,10 @@
                 // Ensure each event has the required fields before processing
                 if (event.unit_map && event.id && event.name && event.duration) {
                     const providerId = event.unit_map; // Assuming unit_map is a provider ID directly
-                    const serviceId = event.id; // Event ID is the service ID
                     calendarEvents.push({
                         title: event.name,
-                        start: '2024-10-29T10:00:00', // Use sample start/end time for debugging
-                        end: '2024-10-29T11:00:00',
+                        start: '2024-10-29T10:00:00+00:00', // Use sample start/end time for debugging
+                        end: '2024-10-29T11:00:00+00:00',
                         resourceId: providerId,
                         description: event.description || ''
                     });
@@ -148,6 +147,8 @@
                     console.warn("Event missing required data:", event);
                 }
             });
+
+            
 
             console.log("Processed Resources:", resources);
             console.log("Processed Events:", calendarEvents);
@@ -161,6 +162,7 @@
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 timeZone: 'UTC',
                 initialView: 'resourceTimeGridDay',
+                initialDate: '2024-10-29', // Set the initial date to October 29, 2024
                 resources: resources,
                 events: calendarEvents,
                 headerToolbar: {

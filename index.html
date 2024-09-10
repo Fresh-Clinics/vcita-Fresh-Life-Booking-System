@@ -190,8 +190,8 @@
             });
 
             // Set parameters for fetching start times
-            const from = '2024-10-30'; // Adjust as needed
-            const to = '2024-11-01'; // Adjust as needed
+            const from = '2024-10-29'; // Adjust as needed
+            const to = '2024-10-31'; // Adjust as needed
 
             client.request('getStartTimeMatrix', [from, to, eventId, [unitId], 1, null, []], function (timeMatrix) {
                 console.log("Fetched start times for event:", timeMatrix);

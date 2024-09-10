@@ -89,7 +89,7 @@
                         // Fetch events (services) from SimplyBook.me
                         client.request('getEventList', [], function (events) {
                             if (events) {
-                                console.log("Fetched events:", events);  // Log all events to inspect structure
+                                console.log("Fetched events (raw):", events);  // Log all events to inspect structure
 
                                 // Ensure the events object is correctly handled
                                 if (typeof events === 'object' && !Array.isArray(events)) {
@@ -156,6 +156,7 @@
             // Map events to FullCalendar events, including all fields
             var calendarEvents = [];
             events.forEach(function (event) {
+                console.log("Processing event:", event); // Log each event to verify its structure
                 if (event.unit_map && event.id && event.name && event.start && event.end) {
                     const providerId = Object.keys(event.unit_map)[0]; // Get the provider ID from the unit_map
                     const eventStart = new Date(event.start).toISOString();
@@ -199,7 +200,7 @@
                         ticket_id: event.ticket_id || null
                     });
                 } else {
-                    console.warn("Event missing required data:", event);
+                    console.warn("Event missing required data or incorrect format:", event);
                 }
             });
 

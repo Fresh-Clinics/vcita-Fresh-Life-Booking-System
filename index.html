@@ -15,6 +15,11 @@
     <!-- Include the JSON-RPC Client Script -->
     <script src="json-rpc-client.js"></script>
 
+    <!-- Include Tippy.js for tooltips -->
+    <link href="https://unpkg.com/tippy.js@6/dist/tippy.css" rel="stylesheet" />
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+
     <style>
         body {
             margin: 40px 10px;
@@ -27,6 +32,19 @@
         #calendar {
             max-width: 1100px;
             margin: 0 auto;
+        }
+
+        .tippy-box {
+            background: #1E252B;
+            color: #FFFFFF;
+            max-width: 200px;
+            width: auto;
+            font-size: .8rem;
+            padding: .5em 1em;
+        }
+
+        .tippy-box[data-placement^='top'] > .tippy-arrow::before {
+            border-top-color: #1E252B;
         }
     </style>
 </head>
@@ -278,6 +296,15 @@
                         console.warn("Event data is missing or incorrect", arg.event);
                         return { html: '<div class="fc-event-content"><div class="fc-event-title">Invalid Event</div></div>' };
                     }
+                },
+                eventDidMount: function (info) {
+                    // Initialize tippy.js for tooltips with HTML content
+                    tippy(info.el, {
+                        content: info.event.extendedProps.description, // Use the event's description as the tooltip content
+                        allowHTML: true, // Enable HTML in the tooltip
+                        theme: 'light-border', // Choose a theme for the tooltip
+                        placement: 'top', // Set the placement of the tooltip
+                    });
                 },
                 slotMinTime: '08:00:00', // Set the start time of slots to match your schedule
                 slotMaxTime: '23:00:00'  // Set the end time of slots to match your schedule

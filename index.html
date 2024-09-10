@@ -73,11 +73,15 @@
 
                 // Map events to FullCalendar events
                 var calendarEvents = Object.values(events).map(function (event) {
+                    // Assuming each event has a start_time, end_time, and unit_id (provider ID)
                     return {
-                        title: event.name,
-                        start: event.start_time,  // Use the correct start time format from your API response
-                        end: event.end_time,      // Use the correct end time format from your API response
-                        resourceId: event.unit_id // Assign the event to a specific provider (resource)
+                        title: event.name, // Name of the service
+                        start: new Date(event.start_time),  // Corrected format to Date object
+                        end: new Date(event.end_time),      // Corrected format to Date object
+                        resourceId: event.unit_map ? Object.keys(event.unit_map)[0] : null, // Assign the event to a specific provider (resource)
+                        description: event.description, // Include description if needed
+                        backgroundColor: '#6b9080', // Example color styling
+                        borderColor: '#216849'
                     };
                 });
 
@@ -86,7 +90,21 @@
                     initialView: 'resourceTimeGridDay', // Show daily view broken down by resources
                     initialDate: '2024-10-29',  // Set the starting date
                     resources: resources,
-                    events: calendarEvents
+                    events: calendarEvents,
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'resourceTimeGridDay,resourceTimeGridWeek'
+                    },
+                    eventContent: function (arg) {
+                        // Customize event display using the service name and time
+                        return { 
+                            html: `<div class="fc-event-content">
+                                      <div class="fc-event-title">${arg.event.title}</div>
+                                      <div class="fc-event-time">${arg.event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${arg.event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                   </div>`
+                        };
+                    }
                 });
 
                 calendar.render();

@@ -10,7 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.0/main.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.0/main.min.js"></script>
- 
+
     <!-- Link to External CSS File -->
     <link rel="stylesheet" href="styles.css">
     <!-- Include jQuery and the JSON-RPC Client Script -->
@@ -78,19 +78,21 @@
                 // Map events to FullCalendar events
                 var calendarEvents = Object.values(events).map(function (event) {
                     // Ensure event has the necessary properties
-                    if (event.start_time && event.end_time && event.unit_map) {
+                    if (event.unit_map && Object.keys(event.unit_map).length > 0) {
+                        // Create an event for each provider (unit) it is associated with
+                        const providerId = Object.keys(event.unit_map)[0];
                         return {
                             title: event.name, // Name of the service
-                            start: event.start_time,  // Use date strings directly from API
-                            end: event.end_time,      // Use date strings directly from API
-                            resourceId: Object.keys(event.unit_map)[0], // Assign the event to a specific provider (resource)
-                            description: event.description, // Include description if needed
+                            start: convertToISO(event.start_time),  // Convert to ISO format if necessary
+                            end: convertToISO(event.end_time),      // Convert to ISO format if necessary
+                            resourceId: providerId, // Assign the event to a specific provider (resource)
+                            description: event.description || '', // Include description if needed
                             backgroundColor: '#6b9080', // Example color styling
                             borderColor: '#216849'
                         };
                     } else {
                         console.warn("Event missing required data:", event);
-                        return null;
+                        return null; // Ignore events without the necessary data
                     }
                 }).filter(event => event !== null); // Filter out any null events
 
@@ -120,6 +122,13 @@
                 });
 
                 calendar.render();
+            }
+
+            // Helper function to convert time to ISO format if needed
+            function convertToISO(timeString) {
+                if (!timeString) return null;
+                const date = new Date(timeString); // Adjust this parsing if needed
+                return date.toISOString();
             }
         });
     </script>

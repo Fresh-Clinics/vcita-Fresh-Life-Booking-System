@@ -138,17 +138,6 @@
                         color: provider.color || '',       // Include color for later use
                         picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '', // Include picture path
                         description: provider.description || '',  // Include description
-                        class_id: provider.class_id || null,
-                        email: provider.email || '',
-                        event_map: provider.event_map || {},
-                        file_id: provider.file_id || '',
-                        is_active: provider.is_active || '0',
-                        is_visible: provider.is_visible || '0',
-                        phone: provider.phone || '',
-                        qty: provider.qty || '0',
-                        seo_url: provider.seo_url || null,
-                        services: provider.services || [],
-                        station_id: provider.station_id || ''
                     };
                 })
                 .filter(resource => resource !== null);
@@ -157,10 +146,10 @@
             var calendarEvents = [];
             events.forEach(function (event) {
                 console.log("Processing event:", event); // Log each event to verify its structure
-                if (event.unit_map && event.id && event.name && event.start && event.end) {
+                if (event.unit_map && event.id && event.name && event.duration) {
                     const providerId = Object.keys(event.unit_map)[0]; // Get the provider ID from the unit_map
-                    const eventStart = new Date(event.start).toISOString();
-                    const eventEnd = new Date(event.end).toISOString();
+                    const eventStart = "2024-10-30T09:00:00"; // Replace with actual start time data
+                    const eventEnd = "2024-10-30T11:00:00";   // Replace with actual end time data
 
                     // Push the event into the calendarEvents array
                     calendarEvents.push({
@@ -170,37 +159,10 @@
                         end: eventEnd,      // Ensure end is in ISO format
                         resourceId: providerId,  // Resource ID matches provider
                         description: event.description || '',
-                        additional_fields: event.additional_fields || [],
-                        bookings_limit: event.bookings_limit || '',
-                        buffertime_after: event.buffertime_after || '',
-                        buffertime_before: event.buffertime_before || '',
-                        categories: event.categories || [],
-                        class_id: event.class_id || null,
-                        duration: event.duration || '',
-                        file_id: event.file_id || '',
-                        has_paid_attributes: event.has_paid_attributes || false,
-                        hide_duration: event.hide_duration || '',
-                        is_active: event.is_active || '0',
-                        is_public: event.is_public || '0',
-                        is_recurring: event.is_recurring || '0',
-                        is_visible: event.is_visible || '0',
-                        max_time_till_event: event.max_time_till_event || null,
-                        min_time_till_event: event.min_time_till_event || null,
-                        paid_attributes: event.paid_attributes || [],
-                        picture: event.picture_path ? `${event.picture_sub_path}/${event.picture}` : '',
-                        picture_path: event.picture_path || '',
-                        picture_sub_path: event.picture_sub_path || '',
-                        position: parseInt(event.position) || 0,
-                        position_in_category: event.position_in_category || {},
-                        products: event.products || [],
-                        providers: event.providers || [],
-                        resource_groups: event.resource_groups || [],
-                        seo_url: event.seo_url || null,
-                        short_description: event.short_description || '',
-                        ticket_id: event.ticket_id || null
                     });
                 } else {
                     console.warn("Event missing required data or incorrect format:", event);
+                    console.warn(`Missing data details - unit_map: ${event.unit_map}, id: ${event.id}, name: ${event.name}, duration: ${event.duration}`);
                 }
             });
 
@@ -218,8 +180,8 @@
                 dayMinWidth: 200,
                 slotDuration: '00:30:00',
                 schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives', // Include the license key
-                timeZone: 'Australia/Sydney', // Set the time zone to AEST
-                locale: 'en-au', // Set locale to Australia
+                timeZone: 'Australia/Sydney', // Set the time zone to Sydney, Australia (AEST)
+                locale: 'en-au', // Use Australian English locale for DD/MM format and 12-hour clock
                 initialView: 'resourceTimeGridDay',
                 initialDate: '2024-10-29', // Set the initial date to October 29, 2024
                 resources: resources,

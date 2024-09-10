@@ -77,23 +77,31 @@
 
                 // Map events to FullCalendar events
                 var calendarEvents = Object.values(events).map(function (event) {
-                    // Ensure event has the necessary properties
-                    if (event.unit_map && Object.keys(event.unit_map).length > 0) {
-                        // Create an event for each provider (unit) it is associated with
+                    // Check if the event has all required fields
+                    if (event.unit_map && Object.keys(event.unit_map).length > 0 && event.duration) {
                         const providerId = Object.keys(event.unit_map)[0];
-                        return {
-                            title: event.name, // Name of the service
-                            start: convertToISO(event.start_time),  // Convert to ISO format if necessary
-                            end: convertToISO(event.end_time),      // Convert to ISO format if necessary
-                            resourceId: providerId, // Assign the event to a specific provider (resource)
-                            description: event.description || '', // Include description if needed
-                            backgroundColor: '#6b9080', // Example color styling
-                            borderColor: '#216849'
-                        };
+
+                        // Determine start and end time based on some logic (you might need to adjust this)
+                        const startTime = calculateStartTime(event); // Example function to derive start time
+                        const endTime = calculateEndTime(startTime, event.duration); // Example function to derive end time
+
+                        if (startTime && endTime) {
+                            return {
+                                title: event.name,
+                                start: startTime,
+                                end: endTime,
+                                resourceId: providerId, // Assign the event to a specific provider (resource)
+                                description: event.description || '', // Include description if needed
+                                backgroundColor: '#6b9080', // Example color styling
+                                borderColor: '#216849'
+                            };
+                        } else {
+                            console.warn("Event has missing or invalid times:", event);
+                        }
                     } else {
-                        console.warn("Event missing required data:", event);
-                        return null; // Ignore events without the necessary data
+                        console.warn("Event missing required data (unit_map or duration):", event);
                     }
+                    return null; // Return null if the event data is incomplete
                 }).filter(event => event !== null); // Filter out any null events
 
                 console.log("Resources for FullCalendar:", resources);
@@ -105,32 +113,4 @@
                     initialDate: '2024-10-29',  // Set the starting date
                     resources: resources,
                     events: calendarEvents,
-                    headerToolbar: {
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'resourceTimeGridDay,resourceTimeGridWeek'
-                    },
-                    eventContent: function (arg) {
-                        // Customize event display using the service name and time
-                        return { 
-                            html: `<div class="fc-event-content">
-                                      <div class="fc-event-title">${arg.event.title}</div>
-                                      <div class="fc-event-time">${new Date(arg.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(arg.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                   </div>`
-                        };
-                    }
-                });
-
-                calendar.render();
-            }
-
-            // Helper function to convert time to ISO format if needed
-            function convertToISO(timeString) {
-                if (!timeString) return null;
-                const date = new Date(timeString); // Adjust this parsing if needed
-                return date.toISOString();
-            }
-        });
-    </script>
-</body>
-</html>
+                   

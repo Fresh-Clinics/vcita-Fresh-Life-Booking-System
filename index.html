@@ -154,15 +154,14 @@
                 .filter(resource => resource !== null);
 
             // Map events to FullCalendar events, including all fields
-            var calendarEvents = [];
-            events.forEach(function (event) {
+            var calendarEvents = Object.values(events).map(function (event) {
                 if (event.unit_map && event.id && event.name && event.start && event.end) {
-                    const providerId = event.unit_map; // Assuming unit_map is a provider ID directly
+                    const providerId = Object.keys(event.unit_map)[0]; // Get the provider ID from the unit_map
                     const eventStart = new Date(event.start).toISOString();
                     const eventEnd = new Date(event.end).toISOString();
 
                     // Return all fields of the event
-                    calendarEvents.push({
+                    return {
                         id: event.id,
                         title: event.name,
                         start: eventStart,  // Ensure start is in ISO format
@@ -197,11 +196,12 @@
                         seo_url: event.seo_url || null,
                         short_description: event.short_description || '',
                         ticket_id: event.ticket_id || null
-                    });
+                    };
                 } else {
                     console.warn("Event missing required data:", event);
+                    return null; // Filter out null values
                 }
-            });
+            }).filter(event => event !== null);
 
             console.log("Processed Resources:", resources);
             console.log("Processed Events:", calendarEvents);

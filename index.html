@@ -124,7 +124,7 @@
         }
 
         function processEventsAndRenderCalendar(providers, events) {
-            // Map providers to FullCalendar resources
+            // Map providers to FullCalendar resources, including all fields
             var resources = Object.values(providers)
                 .map(function (provider) {
                     if (!provider.id || !provider.name) {
@@ -138,6 +138,17 @@
                         color: provider.color || '',       // Include color for later use
                         picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '', // Include picture path
                         description: provider.description || '',  // Include description
+                        class_id: provider.class_id || null,
+                        email: provider.email || '',
+                        event_map: provider.event_map || {},
+                        file_id: provider.file_id || '',
+                        is_active: provider.is_active || '0',
+                        is_visible: provider.is_visible || '0',
+                        phone: provider.phone || '',
+                        qty: provider.qty || '0',
+                        seo_url: provider.seo_url || null,
+                        services: provider.services || [],
+                        station_id: provider.station_id || ''
                     };
                 })
                 .filter(resource => resource !== null)

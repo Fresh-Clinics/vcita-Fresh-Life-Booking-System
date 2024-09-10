@@ -8,6 +8,8 @@
     <!-- Include FullCalendar CSS and JavaScript -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.0/main.min.css" rel="stylesheet">
+
+    <!-- Make sure to include the FullCalendar scripts only once -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.0/main.min.js"></script>
 
@@ -16,7 +18,6 @@
     <!-- Include jQuery and the JSON-RPC Client Script -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="json-rpc-client.js"></script>
-    
 </head>
 <body>
 
@@ -25,6 +26,12 @@
     <script>
         $(document).ready(function () {
             console.log("Initializing SimplyBook Widget with Providers...");
+
+            // Clear any previous FullCalendar instances if they exist
+            if (typeof FullCalendar !== 'undefined' && FullCalendar.Calendar) {
+                FullCalendar.Calendar.noConflict();
+                console.log("Previous FullCalendar instance cleared.");
+            }
 
             // Initialize JSON-RPC Client for SimplyBook API to fetch the token
             try {

@@ -48,170 +48,36 @@ $(document).ready(function () {
                     color: provider.color || '',
                     picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '',
                     description: provider.description || '',
-                    category: provider.categories[0] // Assuming the first category is the one to display
+                    category: provider.category_name // Assuming category name is included
                 }));
 
-                renderCalendar(resources, token);
+                // Group resources by category
+                const categories = groupResourcesByCategory(resources);
+                
+                renderCalendar(resources, categories, token);
             } else {
                 console.error("No providers returned. Please check the API response.");
-                renderCalendar([], token); // Render empty calendar
+                renderCalendar([], {}, token); // Render empty calendar
             }
         }, function (error) {
             console.error("Error fetching providers:", error);
-            renderCalendar([], token); // Render empty calendar
+            renderCalendar([], {}, token); // Render empty calendar
         });
     }
 
-    function fetchEventsForRange(token, start, end, callback) {
-        var client = new JSONRpcClient({
-            'url': 'https://user-api.simplybook.me',
-            'headers': {
-                'X-Company-Login': 'thefreshlifeconference',
-                'X-Token': token
-            },
-            'onerror': function (error) {
-                console.error("Error in JSON-RPC client setup:", error);
+    // Function to group resources by category
+    function groupResourcesByCategory(resources) {
+        const categories = {};
+        resources.forEach(resource => {
+            if (!categories[resource.category]) {
+                categories[resource.category] = [];
             }
+            categories[resource.category].push(resource);
         });
-
-        // Fetch events (services) from SimplyBook.me
-        client.request('getEventList', [], function (events) {
-            if (events) {
-                console.log("Fetched events (raw):", events);
-
-                // Ensure the events object is correctly handled
-                if (typeof events === 'object' && !Array.isArray(events)) {
-                    events = Object.values(events); // Convert to array if it's an object
-                }
-
-                if (Array.isArray(events) && events.length > 0) {
-                    processEvents(events, token, start, end, callback);
-                } else {
-                    console.error("No valid events returned. Please check the API response.");
-                    callback([]); // Return empty array if no events
-                }
-            } else {
-                console.error("No events returned. Please check the API response.");
-                callback([]); // Return empty array if no events
-            }
-        }, function (error) {
-            console.error("Error fetching events:", error);
-            callback([]); // Return empty array on error
-        });
+        return categories;
     }
 
-    function processEvents(events, token, start, end, callback) {
-        var calendarEvents = [];
-        var processedCount = 0;
-
-        events.forEach(function (event) {
-            if (event.unit_map && event.id && event.name) {
-                console.log("Processing event:", event); // Log each event to verify its structure
-                const providerId = Object.keys(event.unit_map)[0]; // Get the provider ID from the unit_map
-
-                // Fetch start time dynamically using getStartTimeMatrix
-                fetchEventStartTime(token, event.id, providerId, start, end, function (startTime) {
-                    if (startTime && isDateInRange(startTime, start, end)) { // Check if start time is within the active date range
-                        // Fetch end time dynamically using calculateEndTime
-                        fetchEventEndTime(token, startTime, event.id, providerId, function (endTime) {
-                            if (endTime) {
-                                // Push the event into the calendarEvents array
-                                calendarEvents.push({
-                                    id: event.id,
-                                    title: event.name,
-                                    start: startTime,
-                                    end: endTime,
-                                    resourceId: providerId,
-                                    description: event.description || '',
-                                    category: event.categories[0] // Get the first category
-                                });
-                            }
-
-                            // Check if all events are processed
-                            processedCount++;
-                            if (processedCount === events.length) {
-                                callback(calendarEvents); // Callback with all processed events
-                            }
-                        });
-                    } else {
-                        processedCount++;
-                        if (processedCount === events.length) {
-                            callback(calendarEvents); // Callback with all processed events
-                        }
-                    }
-                });
-            } else {
-                console.warn("Event missing required data or incorrect format:", event);
-                processedCount++;
-                if (processedCount === events.length) {
-                    callback(calendarEvents); // Callback with all processed events
-                }
-            }
-        });
-    }
-
-    function isDateInRange(date, start, end) {
-        const dateObj = new Date(date);
-        return dateObj >= new Date(start) && dateObj <= new Date(end); // Check if date is within the range
-    }
-
-    function fetchEventStartTime(token, eventId, unitId, from, to, callback) {
-        var client = new JSONRpcClient({
-            'url': 'https://user-api.simplybook.me',
-            'headers': {
-                'X-Company-Login': 'thefreshlifeconference',
-                'X-Token': token
-            },
-            'onerror': function (error) {
-                console.error("Error in JSON-RPC client setup:", error);
-            }
-        });
-
-        // Fetch start times only for the current visible days
-        client.request('getStartTimeMatrix', [from, from, eventId, [unitId], 1, null, []], function (timeMatrix) {
-            console.log("Fetched start times for event:", timeMatrix);
-            if (timeMatrix && Object.keys(timeMatrix).length > 0) {
-                const firstDate = Object.keys(timeMatrix)[0]; // Get the first available date
-                const startTime = timeMatrix[firstDate][0];   // Get the first available time
-                const fullStartTime = `${firstDate}T${startTime}`; // Combine to full ISO date-time string
-                callback(fullStartTime);
-            } else {
-                console.error("No start time available for the given parameters.");
-                callback(null);
-            }
-        }, function (error) {
-            console.error("Error fetching start times:", error);
-            callback(null);
-        });
-    }
-
-    function fetchEventEndTime(token, startDateTime, eventId, unitId, callback) {
-        var client = new JSONRpcClient({
-            'url': 'https://user-api.simplybook.me',
-            'headers': {
-                'X-Company-Login': 'thefreshlifeconference',
-                'X-Token': token
-            },
-            'onerror': function (error) {
-                console.error("Error in JSON-RPC client setup:", error);
-            }
-        });
-
-        client.request('calculateEndTime', [startDateTime, eventId, unitId, []], function (endTime) {
-            console.log("Fetched end time for event:", endTime);
-            if (endTime) {
-                callback(endTime);
-            } else {
-                console.error("No end time available for the given parameters.");
-                callback(null);
-            }
-        }, function (error) {
-            console.error("Error fetching end time:", error);
-            callback(null);
-        });
-    }
-
-    function renderCalendar(resources, token) {
+    function renderCalendar(resources, categories, token) {
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             height: 'auto',
@@ -223,10 +89,6 @@ $(document).ready(function () {
             initialDate: '2024-10-29',
             allDaySlot: false, // Remove 'All Day' slot
             resources: resources,
-            events: function (info, successCallback, failureCallback) {
-                // Fetch events for the current date range
-                fetchEventsForRange(token, info.startStr, info.endStr, successCallback);
-            },
             headerToolbar: {
                 left: 'prev',
                 center: 'title',
@@ -281,27 +143,27 @@ $(document).ready(function () {
             slotMaxTime: '23:00:00'  // Set the end time of slots to match your schedule
         });
 
+        // Render categories row above resources
+        renderCategoriesRow(categories);
+
         calendar.render();
         console.log("Calendar rendered with events.");
-
-        renderCategoriesRow(resources);
     }
 
-    function renderCategoriesRow(resources) {
-        const uniqueCategories = [...new Set(resources.map(resource => resource.category))].filter(Boolean);
+    function renderCategoriesRow(categories) {
+        // Create a new row for categories
+        const calendarHeader = document.querySelector('.fc-col-header');
         const categoryRow = document.createElement('div');
-        categoryRow.className = 'fc-category-row';
+        categoryRow.className = 'fc-col-header-category-row';
 
-        uniqueCategories.forEach(category => {
+        Object.keys(categories).forEach(category => {
             const categoryCell = document.createElement('div');
-            categoryCell.className = 'fc-category-cell';
+            categoryCell.className = 'fc-col-header-cell';
             categoryCell.innerText = category;
+            categoryCell.style.gridColumn = `span ${categories[category].length}`; // Span across resources
             categoryRow.appendChild(categoryCell);
         });
 
-        const headerRow = document.querySelector('.fc-col-header.fc-widget-header');
-        if (headerRow) {
-            headerRow.insertAdjacentElement('beforebegin', categoryRow);
-        }
+        calendarHeader.insertAdjacentElement('beforebegin', categoryRow); // Insert the category row before the resource row
     }
 });

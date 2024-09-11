@@ -37,7 +37,7 @@ $(document).ready(function () {
             }
         });
 
-        // Function to handle retry with exponential backoff
+        // Function to handle retry with exponential backoff and request throttling
         function retryRequest(requestFunc, retries = 5, delay = 1000) {
             requestFunc().catch(error => {
                 if (error.message === 'Too many requests' && retries > 0) {

@@ -41,7 +41,11 @@
         }
 
         .fc-timegrid-axis-frame {
-            height: 63px; /* Adjusted height */
+            height: 63px !important; /* Adjusted height */
+        }
+
+        .fc th {
+            vertical-align: middle; /* Align headers to the middle */
         }
 
         .fc-event {
@@ -104,6 +108,7 @@
         }
 
         .fc-category-cell {
+            display: table-cell; /* Adjust to table-cell */
             text-align: center;
             padding: 5px;
             font-weight: bold;
@@ -190,7 +195,7 @@
                 center: 'title',
                 right: 'next'
             },
-            dayMinWidth: 150, // Set column width
+            dayMinWidth: 150,
             resources: resources,
             events: [
                 { id: '1', title: 'Test event', start: '2024-10-29T14:00:00', end: '2024-10-29T15:00:00', resourceId: '4' },

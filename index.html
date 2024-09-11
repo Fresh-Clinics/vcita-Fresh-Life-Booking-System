@@ -162,7 +162,7 @@
                         title: provider.name,
                         position: parseInt(provider.position) || 0,
                         color: provider.color || '',
-                        picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '',
+                        picture: provider.picture_path ? `${provider.picture_path}/${provider.picture}` : '',
                         description: provider.description || ''
                     }));
 
@@ -237,9 +237,9 @@
                                         start: startTime,
                                         end: endTime,
                                         resourceId: providerId,
-                                        description: event.description || 'No description available.',
-                                        picture: event.picture_path && event.picture ? `${event.picture_path}/${event.picture}` : null,
-                                        category: event.category || '1',  // Default category if missing
+                                        description: event.description || '',
+                                        picture: event.picture_path ? `${event.picture_path}/${event.picture}` : '',
+                                        category: event.categories[0] || '1',  // Example: setting a default category if missing
                                         service: event.id  // Assuming service ID is the event ID
                                     });
                                 }

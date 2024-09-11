@@ -46,11 +46,80 @@
         .tippy-box[data-placement^='top'] > .tippy-arrow::before {
             border-top-color: #1E252B;
         }
+
+        /* Modal styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 9999; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            max-width: 500px; /* Max width */
+            border-radius: 5px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+        }
+
+        .book-now-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .book-now-btn:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
 
 <div id="calendar"></div>
+
+<!-- Modal for Event Details -->
+<div id="eventModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalEventName"></h2>
+        <p id="modalEventDescription"></p>
+        <img id="modalProviderImage" class="modal-img" src="" alt="Provider Image">
+        <button class="book-now-btn">Book Now</button>
+    </div>
+</div>
 
 <script>
     $(document).ready(function () {
@@ -274,7 +343,14 @@
                 timeZone: 'Australia/Sydney', // Set timezone to AEST
                 initialView: 'resourceTimeGridDay',
                 initialDate: '2024-10-29',
-                resources: resources,
+                resources: function (callback) {
+                    // Fetch resources and filter out those without events
+                    fetchEventsForRange(token, calendar.view.activeStart.toISOString().split('T')[0], calendar.view.activeEnd.toISOString().split('T')[0], function (events) {
+                        const providersWithEvents = new Set(events.map(event => event.resourceId));
+                        const filteredResources = resources.filter(resource => providersWithEvents.has(resource.id));
+                        callback(filteredResources);
+                    });
+                },
                 events: function (info, successCallback, failureCallback) {
                     // Fetch events for the current date range
                     fetchEventsForRange(token, info.startStr, info.endStr, successCallback);
@@ -300,11 +376,43 @@
                 eventDidMount: function (info) {
                     // Initialize tippy.js for tooltips with HTML content
                     tippy(info.el, {
-                         content: `<strong>${info.event.title}</strong><br>${info.event.extendedProps.description}`, // Event name in bold and description below
+                        content: `<strong>${info.event.title}</strong><br>${info.event.extendedProps.description}`, // Event name in bold and description below
                         allowHTML: true, // Enable HTML in the tooltip
                         theme: 'light-border', // Choose a theme for the tooltip
                         placement: 'top', // Set the placement of the tooltip
                     });
+                },
+                eventClick: function (info) {
+                    // Show modal popup with event details
+                    var modal = document.getElementById("eventModal");
+                    var span = document.getElementsByClassName("close")[0];
+
+                    document.getElementById("modalEventName").innerText = info.event.title;
+                    document.getElementById("modalEventDescription").innerHTML = info.event.extendedProps.description;
+
+                    // If provider picture is available
+                    if (info.event.extendedProps.providerPicture) {
+                        document.getElementById("modalProviderImage").src = info.event.extendedProps.providerPicture;
+                        document.getElementById("modalProviderImage").style.display = "block";
+                    } else {
+                        document.getElementById("modalProviderImage").style.display = "none";
+                    }
+
+                    modal.style.display = "block"; // Show the modal
+
+                    // Close the modal when the 'x' is clicked
+                    span.onclick = function() {
+                        modal.style.display = "none";
+                    };
+
+                    // Close the modal when the user clicks anywhere outside of the modal
+                    window.onclick = function(event) {
+                        if (event.target == modal) {
+                            modal.style.display = "none";
+                        }
+                    };
+
+                    info.jsEvent.preventDefault(); // Prevent default action (don't navigate)
                 },
                 slotMinTime: '08:00:00', // Set the start time of slots to match your schedule
                 slotMaxTime: '23:00:00'  // Set the end time of slots to match your schedule

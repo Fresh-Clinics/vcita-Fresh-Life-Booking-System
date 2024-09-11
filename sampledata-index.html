@@ -37,10 +37,6 @@
             margin: 0 auto;
         }
 
-        .fc-timegrid-slot {
-            height: 60px !important;
-        }
-
         .fc-event {
             background-color: #142652 !important;
             color: white;
@@ -99,9 +95,9 @@
 
 <div id="calendar"></div>
 
-<!-- Custom Scripts -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Sample data for resources
         const resources = [
             { id: '1', title: 'Woodlands Stage', category: 'Program', order_id: 'a' },
             { id: '2', title: 'Fresh Lounge', category: 'Program', order_id: 'b' },
@@ -131,8 +127,9 @@
             { id: '26', title: 'The Fresh Spa', category: 'Wellness & Spa', order_id: 'z' }
         ];
 
-        // Sort resources based on order_id
+        // Sort resources by order_id
         resources.sort((a, b) => a.order_id.localeCompare(b.order_id));
+        console.log("Sorted Resources:", resources);
 
         // Sample data for events
         const events = [
@@ -162,7 +159,7 @@
             }
         ];
 
-        // Initialize the FullCalendar
+        // Render the calendar
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
@@ -170,17 +167,50 @@
             initialDate: '2024-10-29',
             timeZone: 'Australia/Sydney',
             headerToolbar: {
-                left: 'prev,next today',
+                left: 'prev',
                 center: 'title',
-                right: 'resourceTimeGridDay,timeGridWeek,dayGridMonth'
+                right: 'next'
             },
-            resources: resources, // Use the sorted resources
-            events: events, // Assuming you have your `events` array defined somewhere
-            dayMinWidth: 150, // Customize column width as needed
-            allDaySlot: false,
+            dayMinWidth: 150, // Set column width
+            resources: resources,
+            events: events,
             height: 'auto',
             slotMinTime: '08:00:00',
-            slotMaxTime: '23:00:00'
+            slotMaxTime: '23:00:00',
+            resourceOrder: 'order_id', // Order by order_id
+            eventContent: function (arg) {
+                if (arg.event && arg.event.title) {
+                    return {
+                        html: `<div class="fc-event-content">
+                                  <div class="fc-event-title">${arg.event.title}</div>
+                               </div>`
+                    };
+                } else {
+                    return { html: '<div class="fc-event-content"><div class="fc-event-title">Invalid Event</div></div>' };
+                }
+            },
+            eventDidMount: function (info) {
+                tippy(info.el, {
+                    content: `<strong>${info.event.title}</strong><br>${info.event.extendedProps.description}`,
+                    allowHTML: true,
+                    theme: 'light-border',
+                    placement: 'top'
+                });
+            },
+            eventClick: function (info) {
+                const event = info.event;
+                const popup = document.createElement('div');
+                popup.className = 'popup-overlay';
+                popup.innerHTML = `
+                    <div class="popup-content">
+                        <span class="close-popup" onclick="this.parentElement.parentElement.remove()">×</span>
+                        <h2>${event.title}</h2>
+                        <p>${event.extendedProps.description}</p>
+                    </div>
+                `;
+                document.body.appendChild(popup);
+            },
+            allDaySlot: false
         });
 
         calendar.render();

@@ -102,7 +102,6 @@
         }
 
         .fc-category-cell {
-            flex-grow: 1;
             text-align: center;
             padding: 5px;
             font-weight: bold;
@@ -120,6 +119,11 @@
 
         .hidden {
             display: none !important;
+        }
+
+        .fc-empty-column {
+            width: 150px; /* Default width for hidden column */
+            background-color: #eaeaea;
         }
     </style>
 </head>
@@ -259,7 +263,7 @@
                         <span>${category}</span>
                         <span class="fc-category-toggle">-</span>
                     `;
-                    categoryCell.style.width = `${getCategoryWidth(category)}px`; // Calculate width dynamically
+                    categoryCell.colSpan = getCategoryColSpan(category); // Span across resource columns
 
                     // Toggle visibility of resources under the category
                     categoryCell.querySelector('.fc-category-toggle').addEventListener('click', function () {
@@ -274,10 +278,10 @@
             }
         }
 
-        function getCategoryWidth(category) {
-            // Calculate width for each category based on the number of resources
+        function getCategoryColSpan(category) {
+            // Calculate colspan for each category based on the number of resources
             const resourcesInCategory = resources.filter(resource => resource.category === category);
-            return resourcesInCategory.length * 150; // Multiply by column width
+            return resourcesInCategory.length;
         }
 
         function toggleCategoryResources(category) {
@@ -293,6 +297,11 @@
                     resourceCols.forEach(col => col.classList.toggle('hidden'));
                 }
             });
+
+            // Adjust the colspan dynamically when resources are hidden
+            const categoryCell = document.querySelector(`.fc-category-cell span:contains(${category})`).parentNode;
+            const isExpanded = categoryCell.querySelector('.fc-category-toggle').textContent === '-';
+            categoryCell.colSpan = isExpanded ? resourcesInCategory.length : 1; // If expanded, full colspan; otherwise, 1
         }
 
         addCategoryHeaders(); // Call the function once the calendar is rendered

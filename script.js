@@ -220,8 +220,6 @@ $(document).ready(function () {
             timeZone: 'Australia/Sydney', // Set timezone to AEST
             initialView: 'resourceTimeGridDay',
             initialDate: '2024-10-29',
-            allDaySlot: false, // Remove "All Day" row
-            slotMinHeight: 60, // Increase slot height
             resources: resources,
             events: function (info, successCallback, failureCallback) {
                 // Fetch events for the current date range

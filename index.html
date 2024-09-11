@@ -46,54 +46,11 @@
         .tippy-box[data-placement^='top'] > .tippy-arrow::before {
             border-top-color: #1E252B;
         }
-
-        .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 1000; 
-            left: 0; 
-            top: 0; 
-            width: 100%; 
-            height: 100%; 
-            overflow: auto; 
-            background-color: rgb(0,0,0); 
-            background-color: rgba(0,0,0,0.4); 
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto; 
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%; 
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
 
 <div id="calendar"></div>
-
-<!-- Modal for Booking -->
-<div id="bookingModal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <div id="modalContent"></div>
-  </div>
-</div>
 
 <script>
     $(document).ready(function () {
@@ -219,7 +176,8 @@
                                         start: startTime,
                                         end: endTime,
                                         resourceId: providerId,
-                                        description: event.description || ''
+                                        description: event.description || '',
+                                        category: event.categories[0] // Get the first category
                                     });
                                 }
 
@@ -350,12 +308,24 @@
                     });
                 },
                 eventClick: function (info) {
-                    const categoryId = info.event.extendedProps.categoryId;
-                    const serviceId = info.event.id;
-                    const dateStr = info.event.start.toISOString().split('T')[0];
-                    const timeStr = info.event.start.toISOString().split('T')[1].substring(0, 8);
-                    console.log(`Booking: Category ${categoryId}, Service ${serviceId}, Date ${dateStr}, Time ${timeStr}`);
-                    openBookingModal(categoryId, serviceId, dateStr, timeStr);
+                    const event = info.event;
+                    const category = event.extendedProps.category;
+                    const service = event.id;
+                    const date = event.start.toISOString().split('T')[0];
+                    const time = event.start.toTimeString().split(' ')[0];
+
+                    console.log(`Booking: Category ${category}, Service ${service}, Date ${date}, Time ${time}`);
+
+                    // Display popup for booking
+                    const popup = document.createElement('div');
+                    popup.innerHTML = `
+                        <div>
+                            <h2>${event.title}</h2>
+                            <p>${event.extendedProps.description}</p>
+                            <button onclick="confirmBooking('${category}', '${service}', '${date}', '${time}')">Book Now</button>
+                        </div>
+                    `;
+                    document.body.appendChild(popup);
                 },
                 slotMinTime: '08:00:00', // Set the start time of slots to match your schedule
                 slotMaxTime: '23:00:00'  // Set the end time of slots to match your schedule
@@ -365,36 +335,13 @@
             console.log("Calendar rendered with events.");
         }
 
-        function openBookingModal(categoryId, serviceId, dateStr, timeStr) {
-            var modal = document.getElementById("bookingModal");
-            var span = document.getElementsByClassName("close")[0];
+        // Define confirmBooking in the global scope
+        window.confirmBooking = function (category, service, date, time) {
+            console.log(`Booking: Category ${category}, Service ${service}, Date ${date}, Time ${time}`);
 
-            modal.style.display = "block";
-
-            document.getElementById("modalContent").innerHTML = `
-                <h3>Book Your Session</h3>
-                <p>Category: ${categoryId}</p>
-                <p>Service: ${serviceId}</p>
-                <p>Date: ${dateStr}</p>
-                <p>Time: ${timeStr}</p>
-                <button onclick="confirmBooking('${categoryId}', '${serviceId}', '${dateStr}', '${timeStr}')">Confirm Booking</button>
-            `;
-
-            span.onclick = function() {
-                modal.style.display = "none";
-            }
-
-            window.onclick = function(event) {
-                if (event.target == modal) {
-                    modal.style.display = "none";
-                }
-            }
-        }
-
-        function confirmBooking(categoryId, serviceId, dateStr, timeStr) {
-            console.log(`Confirmed booking for Category ${categoryId}, Service ${serviceId}, Date ${dateStr}, Time ${timeStr}`);
-            // Implement API call for booking confirmation here...
-        }
+            // Add booking logic here, making API calls to SimplyBook.me to perform the booking.
+            // Example API call can be placed here based on SimplyBook.me's API documentation.
+        };
     });
 </script>
 

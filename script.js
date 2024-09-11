@@ -121,7 +121,8 @@ $(document).ready(function () {
                                     start: startTime,
                                     end: endTime,
                                     resourceId: providerId,
-                                    description: event.description || ''
+                                    description: event.description || '',
+                                    category: event.categories[0] // Get the first category
                                 });
                             }
 
@@ -215,11 +216,11 @@ $(document).ready(function () {
             height: 'auto',
             dayMinWidth: 100,
             slotDuration: '00:30:00',
-            allDaySlot: false, // This will remove the "All Day" row
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
             timeZone: 'Australia/Sydney', // Set timezone to AEST
             initialView: 'resourceTimeGridDay',
             initialDate: '2024-10-29',
+            allDaySlot: false, // Remove 'All Day' slot
             resources: resources,
             events: function (info, successCallback, failureCallback) {
                 // Fetch events for the current date range
@@ -252,27 +253,34 @@ $(document).ready(function () {
                     placement: 'top', // Set the placement of the tooltip
                 });
             },
+            eventClick: function (info) {
+                const event = info.event;
+                const category = event.extendedProps.category;
+                const service = event.id;
+                const date = event.start.toISOString().split('T')[0];
+                const time = event.start.toTimeString().split(' ')[0];
+
+                console.log(`Booking: Category ${category}, Service ${service}, Date ${date}, Time ${time}`);
+
+                // Display popup for booking
+                const popup = document.createElement('div');
+                popup.className = 'popup-overlay';
+                popup.innerHTML = `
+                    <div class="popup-content">
+                        <span class="close-popup" onclick="this.parentElement.parentElement.remove()">×</span>
+                        <h2>${event.title}</h2>
+                        <p>${event.extendedProps.description}</p>
+                        <img src="${event.extendedProps.picture || ''}" alt="Provider Image" style="max-width: 100%;">
+                        <div class="popup-message"><strong>Bookings open at 7pm AEST Monday 23rd October</strong></div>
+                    </div>
+                `;
+                document.body.appendChild(popup);
+            },
             slotMinTime: '08:00:00', // Set the start time of slots to match your schedule
             slotMaxTime: '23:00:00'  // Set the end time of slots to match your schedule
         });
 
         calendar.render();
         console.log("Calendar rendered with events.");
-    }
-
-    function openPopup(title, description, imageUrl) {
-        document.getElementById('event-title').textContent = title;
-        document.getElementById('event-description').textContent = description;
-        if (imageUrl) {
-            document.getElementById('event-image').src = imageUrl;
-            document.getElementById('event-image').style.display = 'block';
-        } else {
-            document.getElementById('event-image').style.display = 'none';
-        }
-        document.getElementById('event-popup').style.display = 'block';
-    }
-
-    function closePopup() {
-        document.getElementById('event-popup').style.display = 'none';
     }
 });

@@ -98,6 +98,7 @@
             text-align: center;
             background-color: #f0f0f0;
             padding: 5px;
+            border-right: 1px solid #ddd;
         }
     </style>
 </head>
@@ -187,6 +188,18 @@
             height: 'auto',
             slotMinTime: '08:00:00',
             slotMaxTime: '23:00:00',
+            resourceAreaHeaderContent: 'Category/Resource', // Custom header content for resources area
+            resourceAreaColumns: [
+                {
+                    group: true, // Enable grouping
+                    labelText: 'Category',
+                    field: 'category'
+                },
+                {
+                    headerContent: 'Resource',
+                    field: 'title'
+                }
+            ],
             eventContent: function (arg) {
                 if (arg.event && arg.event.title) {
                     return {

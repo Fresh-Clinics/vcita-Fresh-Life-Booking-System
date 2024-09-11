@@ -50,8 +50,9 @@ $(document).ready(function () {
                     description: provider.description || ''
                 }));
 
-                // Categorize resources by color code
+                // Categorize resources by color
                 const categorizedResources = categorizeResourcesByColor(resources);
+
                 renderCalendar(resources, token, categorizedResources);
             } else {
                 console.error("No providers returned. Please check the API response.");
@@ -111,7 +112,7 @@ $(document).ready(function () {
             eventContent: function (arg) {
                 if (arg.event && arg.event.title) {
                     return {
-                        html: `<div class="fc-event-content">
+                        html: `<div class="fc-event-content" style="padding: 5px">
                                   <div class="fc-event-title">${arg.event.title}</div>
                                </div>`
                     };
@@ -179,6 +180,45 @@ $(document).ready(function () {
         }
     }
 
-    // Existing functions for fetching events and other utilities
-    // (fetchEventsForRange, processEvents, fetchEventStartTime, fetchEventEndTime, etc.)
+    // Existing functions for fetching events and other utilities (fetchEventsForRange, processEvents, fetchEventStartTime, fetchEventEndTime, etc.)
+    
+    function fetchEventsForRange(token, start, end, callback) {
+        var client = new JSONRpcClient({
+            'url': 'https://user-api.simplybook.me',
+            'headers': {
+                'X-Company-Login': 'thefreshlifeconference',
+                'X-Token': token
+            },
+            'onerror': function (error) {
+                console.error("Error in JSON-RPC client setup:", error);
+            }
+        });
+
+        // Fetch events (services) from SimplyBook.me
+        client.request('getEventList', [], function (events) {
+            if (events) {
+                console.log("Fetched events (raw):", events);
+
+                // Ensure the events object is correctly handled
+                if (typeof events === 'object' && !Array.isArray(events)) {
+                    events = Object.values(events); // Convert to array if it's an object
+                }
+
+                if (Array.isArray(events) && events.length > 0) {
+                    processEvents(events, token, start, end, callback);
+                } else {
+                    console.error("No valid events returned. Please check the API response.");
+                    callback([]); // Return empty array if no events
+                }
+            } else {
+                console.error("No events returned. Please check the API response.");
+                callback([]); // Return empty array if no events
+            }
+        }, function (error) {
+            console.error("Error fetching events:", error);
+            callback([]); // Return empty array on error
+        });
+    }
+
+    // The remaining utility functions (processEvents, fetchEventStartTime, fetchEventEndTime, etc.) remain unchanged.
 });

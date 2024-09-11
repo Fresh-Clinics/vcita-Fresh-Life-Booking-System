@@ -128,6 +128,8 @@
         }
 
         .fc-col-header-cell {
+            width: 150px !important; /* Fixed width for resources */
+            max-width: 150px !important; /* Ensure max-width of 150px */
             transition: width 0.2s;
         }
 
@@ -227,7 +229,6 @@
                     <div class="popup-content">
                         <span class="close-popup" onclick="this.parentElement.parentElement.remove()">×</span>
                         <h2>${event.title}</h2>
-                        <p>${event.extendedProps.description}</p>
                     </div>
                 `;
                 document.body.appendChild(popup);

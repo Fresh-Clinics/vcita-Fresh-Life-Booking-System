@@ -8,23 +8,34 @@ body {
 #calendar {
     max-width: 1100px;
     margin: 0 auto;
-    height: calc(100vh - 100px); /* Adjust height to leave space for sticky headers */
-    overflow-y: auto; /* Allow vertical scrolling for the calendar content */
+    height: 100vh; /* Use full height of the viewport */
+    overflow: hidden; /* Prevent scrolling for the entire calendar */
+    position: relative; /* Position relative for sticky elements */
+}
+
+.fc-scroller-harness {
+    max-height: calc(100vh - 120px); /* Allow scroll within the scroller harness area */
+    overflow-y: auto; /* Allow vertical scrolling */
     overflow-x: hidden; /* Prevent horizontal scrolling */
-    position: relative; /* Position relative for the sticky elements */
 }
 
-.fc .fc-col-header, 
-.fc-toolbar.fc-header-toolbar,
-.fc .fc-timegrid-axis-cushion { 
-    position: sticky; /* Make these elements sticky */
+/* Make everything outside .fc-scroller-harness sticky */
+.fc-toolbar.fc-header-toolbar, /* Header toolbar */
+.fc-col-header, /* Resource header */
+.fc-timegrid-axis-cushion { /* Time column */
+    position: sticky;
     top: 0;
-    background: white; /* Ensure headers are visible over the content */
-    z-index: 1000; /* Ensure headers are above all other content */
+    background: white;
+    z-index: 1000;
 }
 
-.fc .fc-col-header-cell-cushion {
-    top: 40px; /* Offset for the sticky toolbar */
+.fc-timegrid-axis-cushion {
+    z-index: 100; /* Ensure time column stays above the content */
+}
+
+/* Adjust spacing for sticky toolbar and resource headers */
+.fc-col-header-cell-cushion {
+    top: 40px; /* Offset for sticky toolbar */
 }
 
 .fc-timegrid-slot {

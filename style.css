@@ -13,6 +13,7 @@ body {
 
 .fc-timegrid-slot {
     height: 60px !important; /* Adjusted value with !important */
+    font-family: 'Manrope', sans-serif; /* Ensures consistent font */
 }
 
 .fc-event {

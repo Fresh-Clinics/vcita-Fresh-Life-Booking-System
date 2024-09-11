@@ -19,6 +19,7 @@ body {
     background-color: #142652 !important; /* Set event background color */
     color: white; /* Ensure text is readable */
     border: none; /* Remove border for a clean look */
+    padding: 5px; /* Add padding to event content */
 }
 
 .tippy-box {

@@ -143,6 +143,9 @@
         // Ensure resources are sorted by order_id correctly as numbers
         resources.sort((a, b) => a.order_id - b.order_id);
 
+        // Debug: Log the sorted order of resources
+        console.log("Sorted Resources:", resources);
+
         // Render the calendar
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {

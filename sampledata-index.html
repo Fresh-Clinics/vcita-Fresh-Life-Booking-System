@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Calendar with Categories and Resources</title>
+
+    <!-- Include FullCalendar Scheduler CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@6.1.15/index.global.min.css" rel="stylesheet" />
+
+    <!-- Include Tippy.js for tooltips -->
+    <link href="https://unpkg.com/tippy.js@6/dist/tippy.css" rel="stylesheet" />
+
+    <!-- Include FullCalendar Scheduler JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@6.1.15/index.global.min.js"></script>
+
+    <!-- Include jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Include Tippy.js for tooltips -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+
+    <!-- Custom Styles -->
+    <style>
+        body {
+            margin: 40px 10px;
+            padding: 0;
+            font-family: 'Manrope', sans-serif; /* Set global font to Manrope */
+            font-size: 14px;
+            text-align: center;
+        }
+
+        #calendar {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .fc-timegrid-slot {
+            height: 60px !important; /* Adjusted value with !important */
+        }
+
+        .fc-event {
+            background-color: #142652 !important; /* Set event background color */
+            color: white; /* Ensure text is readable */
+            border: none; /* Remove border for a clean look */
+        }
+
+        .fc-event-content {
+            padding: 5px; /* Add padding to event content */
+        }
+
+        .tippy-box {
+            background: #eae6e3; /* Set tooltip background color */
+            color: #142652; /* Set tooltip text color */
+            max-width: 200px;
+            width: auto;
+            font-size: .8rem;
+            padding: .5em 1em;
+        }
+
+        .tippy-box[data-placement^='top'] > .tippy-arrow::before {
+            border-top-color: #eae6e3; /* Match arrow color to tooltip background */
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+        }
+
+        .close-popup {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+
+        .category-header {
+            font-weight: bold;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="calendar"></div>
+
+<!-- Custom Scripts -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Sample data for categories
+        const categories = [
+            { id: 1, title: 'Program' },
+            { id: 2, title: 'Training Suites' },
+            { id: 3, title: 'Activations Hub' },
+            { id: 4, title: 'Wellness & Spa' }
+        ];
+
+        // Sample data for resources
+        const resources = [
+            { id: '1', title: 'Woodlands Stage', categoryId: 1 },
+            { id: '2', title: 'Fresh Lounge', categoryId: 1 },
+            { id: '3', title: 'Merz | Room 1', categoryId: 2 },
+            { id: '4', title: 'Merz | Room 2', categoryId: 2 },
+            { id: '5', title: 'Galderma | Room 1', categoryId: 2 },
+            { id: '6', title: 'Galderma | Room 2', categoryId: 2 },
+            { id: '7', title: 'Allergan', categoryId: 2 },
+            { id: '8', title: 'Evolus', categoryId: 2 },
+            { id: '9', title: 'Candela', categoryId: 2 },
+            { id: '10', title: 'Cryomed', categoryId: 2 },
+            { id: '11', title: 'Dermocosmetica | Room 1', categoryId: 2 },
+            { id: '12', title: 'Dermocosmetica | Room 2', categoryId: 2 },
+            { id: '13', title: 'EnVogue', categoryId: 2 },
+            { id: '14', title: 'Hugel', categoryId: 2 },
+            { id: '15', title: 'Rejuran', categoryId: 2 },
+            { id: '16', title: 'Teoxane', categoryId: 2 },
+            { id: '17', title: 'Xytide', categoryId: 2 },
+            { id: '18', title: 'Fresh Clinics | Room 1', categoryId: 2 },
+            { id: '19', title: 'Fresh Clinics | Room 2', categoryId: 2 },
+            { id: '20', title: 'Venus Concept', categoryId: 3 },
+            { id: '21', title: 'Alma', categoryId: 3 },
+            { id: '22', title: 'Advanced Skin Technology', categoryId: 3 },
+            { id: '23', title: 'Fresh Tech Hub', categoryId: 3 },
+            { id: '24', title: 'The Skincare Company', categoryId: 3 },
+            { id: '25', title: 'Wellness Sessions', categoryId: 4 },
+            { id: '26', title: 'The Fresh Spa', categoryId: 4 }
+        ];
+
+        // Sample data for events
+        const events = [
+            {
+                id: '1',
+                title: 'Test event',
+                description: 'Test event description goes here',
+                start: '2024-10-29T14:00:00',
+                end: '2024-10-29T15:00:00',
+                resourceId: '4'
+            },
+            {
+                id: '2',
+                title: 'Test 2 event',
+                description: 'Test 2 event description goes here',
+                start: '2024-10-29T14:00:00',
+                end: '2024-10-29T15:00:00',
+                resourceId: '5'
+            },
+            {
+                id: '3',
+                title: 'Test 3 event',
+                description: 'Test 3 event description goes here',
+                start: '2024-10-29T15:00:00',
+                end: '2024-10-29T15:30:00',
+                resourceId: '4'
+            }
+        ];
+
+        // Render the calendar
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+            initialView: 'resourceTimeGridDay',
+            timeZone: 'Australia/Sydney',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'resourceTimeGridDay'
+            },
+            resources: resources,
+            events: events,
+            height: 'auto',
+            slotMinTime: '08:00:00',
+            slotMaxTime: '20:00:00',
+            eventContent: function (arg) {
+                if (arg.event && arg.event.title) {
+                    return {
+                        html: `<div class="fc-event-content">
+                                  <div class="fc-event-title">${arg.event.title}</div>
+                               </div>`
+                    };
+                }
+            },
+            eventDidMount: function (info) {
+                tippy(info.el, {
+                    content: `<strong>${info.event.title}</strong><br>${info.event.extendedProps.description}`,
+                    allowHTML: true,
+                    theme: 'light-border',
+                    placement: 'top',
+                });
+            }
+        });
+
+        // Add category headers dynamically
+        calendar.render();
+        addCategoryHeaders();
+
+        function addCategoryHeaders() {
+            categories.forEach(category => {
+                const categoryResources = resources.filter(resource => resource.categoryId === category.id);
+                if (categoryResources.length > 0) {
+                    const header = document.createElement('div');
+                    header.className = 'category-header';
+                    header.innerText = category.title;
+                    const firstResource = document.querySelector(`.fc-col-header-cell[data-resource-id="${categoryResources[0].id}"]`);
+                    if (firstResource) {
+                        firstResource.parentNode.insertBefore(header, firstResource);
+                        header.style.gridColumn = `span ${categoryResources.length}`;
+                    }
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

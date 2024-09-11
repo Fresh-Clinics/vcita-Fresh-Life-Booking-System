@@ -68,18 +68,13 @@ body {
     cursor: pointer;
 }
 
+/* Style for category row */
 .fc-col-header-category-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #f4f4f4; /* Background color for the category row */
-    padding: 5px 0; /* Padding for the category row */
-    font-weight: bold; /* Make category names bold */
-    border-bottom: 1px solid #ddd; /* Optional border */
-}
-
-.fc-col-header-category-row .fc-col-header-cell {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    background-color: #f4f4f4;
     text-align: center;
-    flex-grow: 1;
+    font-weight: bold;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
 }
-

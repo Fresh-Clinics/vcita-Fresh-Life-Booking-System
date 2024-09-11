@@ -110,14 +110,7 @@
             border-right: 1px solid #ddd;
             position: relative;
             min-width: 150px; /* Set minimum width for category cells */
-        }
-
-        .fc-category-cell .fc-category-toggle {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
+            cursor: pointer; /* Make the whole cell clickable */
         }
 
         .hidden {
@@ -180,36 +173,10 @@
             { id: '30', title: ' ', category: 'Wellness & Spa', order_id: '0', visible: '0' }
         ];
 
-        // Sort resources by order_id
-        resources.sort((a, b) => a.order_id - b.order_id);
+        const categories = ['Program', 'Training Suites', 'Activations Hub', 'Wellness & Spa'];
 
-        // Sample data for events
-        const events = [
-            {
-                id: '1',
-                title: 'Test event',
-                description: 'Test event description goes here',
-                start: '2024-10-29T14:00:00',
-                end: '2024-10-29T15:00:00',
-                resourceId: '4'
-            },
-            {
-                id: '2',
-                title: 'Test 2 event',
-                description: 'Test 2 event description goes here',
-                start: '2024-10-29T14:00:00',
-                end: '2024-10-29T15:00:00',
-                resourceId: '5'
-            },
-            {
-                id: '3',
-                title: 'Test 3 event',
-                description: 'Test 3 event description goes here',
-                start: '2024-10-29T15:00:00',
-                end: '2024-10-29T15:30:00',
-                resourceId: '4'
-            }
-        ];
+        // Sort resources by order_id
+        resources.sort((a, b) => parseInt(a.order_id) - parseInt(b.order_id));
 
         // Render the calendar
         var calendarEl = document.getElementById('calendar');
@@ -223,18 +190,20 @@
                 center: 'title',
                 right: 'next'
             },
-            dayMinWidth: 150,
+            dayMinWidth: 150, // Set column width
             resources: resources,
-            events: events,
+            events: [
+                { id: '1', title: 'Test event', start: '2024-10-29T14:00:00', end: '2024-10-29T15:00:00', resourceId: '4' },
+                { id: '2', title: 'Test 2 event', start: '2024-10-29T14:00:00', end: '2024-10-29T15:00:00', resourceId: '5' },
+                { id: '3', title: 'Test 3 event', start: '2024-10-29T15:00:00', end: '2024-10-29T15:30:00', resourceId: '4' }
+            ],
             height: 'auto',
             slotMinTime: '08:00:00',
             slotMaxTime: '23:00:00',
             eventContent: function (arg) {
                 if (arg.event && arg.event.title) {
                     return {
-                        html: `<div class="fc-event-content">
-                                  <div class="fc-event-title">${arg.event.title}</div>
-                               </div>`
+                        html: `<div class="fc-event-content"><div class="fc-event-title">${arg.event.title}</div></div>`
                     };
                 } else {
                     return { html: '<div class="fc-event-content"><div class="fc-event-title">Invalid Event</div></div>' };
@@ -242,7 +211,7 @@
             },
             eventDidMount: function (info) {
                 tippy(info.el, {
-                    content: `<strong>${info.event.title}</strong><br>${info.event.extendedProps.description}`,
+                    content: `<strong>${info.event.title}</strong>`,
                     allowHTML: true,
                     theme: 'light-border',
                     placement: 'top'
@@ -266,65 +235,40 @@
 
         calendar.render();
 
-        // Function to add category headers with expandable functionality
-        function addCategoryHeaders() {
-            const headerRow = calendarEl.querySelector('.fc-col-header .fc-col-header-cell').parentElement;
+        // Render the category headers above the resources
+        renderCategoryHeaders();
 
-            if (headerRow) {
-                const categoryRow = document.createElement('tr');
-                categoryRow.className = 'fc-category-row';
+        function renderCategoryHeaders() {
+            const headerRow = calendarEl.querySelector('.fc-col-header .fc-col-header-cell');
 
-                const categories = [...new Set(resources.map(resource => resource.category))]; // Unique categories
-                categories.forEach(category => {
-                    const categoryCell = document.createElement('th');
-                    categoryCell.className = 'fc-category-cell';
-                    categoryCell.innerHTML = `
-                        <span>${category}</span>
-                        <span class="fc-category-toggle">-</span>
-                    `;
-                    categoryCell.colSpan = getCategoryColSpan(category); // Span across resource columns
-
-                    // Toggle visibility of resources under the category
-                    categoryCell.querySelector('.fc-category-toggle').addEventListener('click', function () {
-                        toggleCategoryResources(category);
-                        this.textContent = this.textContent === '-' ? '+' : '-';
-                    });
-
-                    categoryRow.appendChild(categoryCell);
-                });
-
-                headerRow.parentNode.insertBefore(categoryRow, headerRow);
-            }
+            categories.forEach(category => {
+                const categoryCell = document.createElement('div');
+                categoryCell.className = 'fc-category-cell';
+                categoryCell.innerText = category;
+                categoryCell.onclick = () => toggleResources(category);
+                
+                const resourcesInCategory = resources.filter(resource => resource.category === category && resource.visible === '1');
+                categoryCell.colSpan = resourcesInCategory.length;
+                headerRow.parentNode.insertAdjacentElement('beforebegin', categoryCell);
+            });
         }
 
-        function getCategoryColSpan(category) {
-            // Calculate colspan for each category based on the number of resources
+        function toggleResources(category) {
             const resourcesInCategory = resources.filter(resource => resource.category === category);
-            return resourcesInCategory.length;
-        }
-
-        function toggleCategoryResources(category) {
-            // Show/hide resources under a specific category
-            const resourcesInCategory = resources.filter(resource => resource.category === category);
-            const categoryCell = document.querySelector(`.fc-category-cell:contains(${category})`);
-            const isExpanded = categoryCell.querySelector('.fc-category-toggle').textContent === '-';
-
             resourcesInCategory.forEach(resource => {
-                const resourceHeader = document.querySelector(`[data-resource-id="${resource.id}"]`);
-                if (resourceHeader) {
-                    const colIndex = Array.from(resourceHeader.parentElement.children).indexOf(resourceHeader) + 1;
-                    const resourceCols = document.querySelectorAll(
-                        `.fc-col-header-cell:nth-child(${colIndex}), .fc-timegrid-col:nth-child(${colIndex})`
-                    );
-                    resourceCols.forEach(col => col.classList.toggle('hidden', !isExpanded));
+                const colEl = document.querySelector(`[data-resource-id="${resource.id}"]`);
+                if (resource.visible === '1') {
+                    colEl.classList.add('hidden');
+                    resource.visible = '0';
+                } else {
+                    colEl.classList.remove('hidden');
+                    resource.visible = '1';
                 }
             });
 
-            // Adjust the colspan dynamically when resources are hidden
-            categoryCell.colSpan = isExpanded ? 1 : resourcesInCategory.length;
+            const blankCol = document.querySelector(`[data-resource-id="${resourcesInCategory[0].id}"]`);
+            blankCol.classList.toggle('hidden');
         }
-
-        addCategoryHeaders(); // Call the function once the calendar is rendered
     });
 </script>
 

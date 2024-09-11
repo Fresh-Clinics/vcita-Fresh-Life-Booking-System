@@ -215,7 +215,7 @@ $(document).ready(function () {
         var calendar = new FullCalendar.Calendar(calendarEl, {
             height: 'auto',
             dayMinWidth: 100,
-            slotDuration: '00:30:00',
+            slotDuration: '00:30:00', // 30-minute intervals
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
             timeZone: 'Australia/Sydney', // Set timezone to AEST
             initialView: 'resourceTimeGridDay',
@@ -251,6 +251,11 @@ $(document).ready(function () {
                     allowHTML: true, // Enable HTML in the tooltip
                     theme: 'light-border', // Choose a theme for the tooltip
                     placement: 'top', // Set the placement of the tooltip
+                    onShown(instance) { // Align tooltip content dynamically
+                        if (!info.event.extendedProps.picture) {
+                            instance.popper.querySelector('.tippy-content').style.paddingBottom = '0';
+                        }
+                    },
                 });
             },
             eventClick: function (info) {

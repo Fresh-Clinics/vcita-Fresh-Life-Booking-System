@@ -220,6 +220,7 @@ $(document).ready(function () {
             timeZone: 'Australia/Sydney', // Set timezone to AEST
             initialView: 'resourceTimeGridDay',
             initialDate: '2024-10-29',
+            allDaySlot: false, // Remove 'All Day' slot
             resources: resources,
             events: function (info, successCallback, failureCallback) {
                 // Fetch events for the current date range
@@ -276,8 +277,7 @@ $(document).ready(function () {
                 document.body.appendChild(popup);
             },
             slotMinTime: '08:00:00', // Set the start time of slots to match your schedule
-            slotMaxTime: '23:00:00',  // Set the end time of slots to match your schedule
-            slotMinHeight: 90  // Set height of each slot
+            slotMaxTime: '23:00:00'  // Set the end time of slots to match your schedule
         });
 
         calendar.render();

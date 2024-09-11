@@ -3,39 +3,46 @@ body {
     padding: 0;
     font-family: 'Manrope', sans-serif; /* Set global font to Manrope */
     font-size: 14px;
+    overflow: hidden; /* Prevent body scrolling */
 }
 
 #calendar {
     max-width: 1100px;
     margin: 0 auto;
     height: 100vh; /* Use full height of the viewport */
-    overflow: hidden; /* Prevent scrolling for the entire calendar */
-    position: relative; /* Position relative for sticky elements */
+    display: flex;
+    flex-direction: column; /* Align children vertically */
+}
+
+.fc-toolbar.fc-header-toolbar,
+.fc-col-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: white;
+}
+
+.fc-col-header {
+    top: 40px; /* Adjust to be below the toolbar */
+}
+
+.fc-view-harness {
+    flex-grow: 1; /* Allow the main view to grow and fill the available space */
+    overflow: hidden; /* Prevent scrolling outside the desired area */
+    position: relative; /* Needed for sticky positioning */
 }
 
 .fc-scroller-harness {
-    max-height: calc(100vh - 120px); /* Allow scroll within the scroller harness area */
-    overflow-y: auto; /* Allow vertical scrolling */
+    max-height: 100%; /* Allow full height for scrolling content */
+    overflow-y: auto; /* Enable vertical scrolling */
     overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
-/* Make everything outside .fc-scroller-harness sticky */
-.fc-toolbar.fc-header-toolbar, /* Header toolbar */
-.fc-col-header, /* Resource header */
-.fc-timegrid-axis-cushion { /* Time column */
-    position: sticky;
-    top: 0;
-    background: white;
-    z-index: 1000;
-}
-
 .fc-timegrid-axis-cushion {
+    position: sticky;
+    left: 0;
     z-index: 100; /* Ensure time column stays above the content */
-}
-
-/* Adjust spacing for sticky toolbar and resource headers */
-.fc-col-header-cell-cushion {
-    top: 40px; /* Offset for sticky toolbar */
+    background: white;
 }
 
 .fc-timegrid-slot {

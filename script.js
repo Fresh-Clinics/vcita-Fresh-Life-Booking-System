@@ -110,7 +110,7 @@ $(document).ready(function () {
 
                 // Fetch start time dynamically using getStartTimeMatrix
                 fetchEventStartTime(token, event.id, providerId, start, end, function (startTime) {
-                    if (startTime) { // Check if start time is within the active date range
+                    if (startTime && isDateInRange(startTime, start, end)) { // Check if start time is within the active date range
                         // Fetch end time dynamically using calculateEndTime
                         fetchEventEndTime(token, startTime, event.id, providerId, function (endTime) {
                             if (endTime) {
@@ -146,6 +146,11 @@ $(document).ready(function () {
                 }
             }
         });
+    }
+
+    function isDateInRange(date, start, end) {
+        const dateObj = new Date(date);
+        return dateObj >= new Date(start) && dateObj <= new Date(end); // Check if date is within the range
     }
 
     function fetchEventStartTime(token, eventId, unitId, from, to, callback) {
@@ -210,6 +215,7 @@ $(document).ready(function () {
             height: 'auto',
             dayMinWidth: 100,
             slotDuration: '00:30:00',
+            allDaySlot: false, // This will remove the "All Day" row
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
             timeZone: 'Australia/Sydney', // Set timezone to AEST
             initialView: 'resourceTimeGridDay',
@@ -252,5 +258,21 @@ $(document).ready(function () {
 
         calendar.render();
         console.log("Calendar rendered with events.");
+    }
+
+    function openPopup(title, description, imageUrl) {
+        document.getElementById('event-title').textContent = title;
+        document.getElementById('event-description').textContent = description;
+        if (imageUrl) {
+            document.getElementById('event-image').src = imageUrl;
+            document.getElementById('event-image').style.display = 'block';
+        } else {
+            document.getElementById('event-image').style.display = 'none';
+        }
+        document.getElementById('event-popup').style.display = 'block';
+    }
+
+    function closePopup() {
+        document.getElementById('event-popup').style.display = 'none';
     }
 });

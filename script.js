@@ -300,9 +300,11 @@ $(document).ready(function () {
 
         slotTimes.forEach(({ date, times, color, textColor }) => {
             times.forEach(time => {
-                $(`.fc-timegrid-col[data-date="${date}"] .fc-timegrid-slot-lane[data-time="${time}"]`).css({
-                    'background-color': color,
-                    'color': textColor || ''
+                $(`.fc-timegrid-col[data-date="${date}"] .fc-timegrid-slot[data-time="${time}"]`).each(function() {
+                    $(this).css({
+                        'background-color': color,
+                        'color': textColor || ''
+                    });
                 });
             });
         });

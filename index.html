@@ -47,61 +47,27 @@
             border-top-color: #1E252B;
         }
 
-        /* Modal styles */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 9999; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgb(0,0,0); /* Fallback color */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto; /* 15% from the top and centered */
+        .popup-content {
             padding: 20px;
-            border: 1px solid #888;
-            width: 80%; /* Could be more or less, depending on screen size */
-            max-width: 500px; /* Max width */
-            border-radius: 5px;
+            text-align: center;
         }
 
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .modal-img {
+        .popup-content img {
             max-width: 100%;
             height: auto;
-            margin: 10px 0;
+            margin-bottom: 20px;
         }
 
-        .book-now-btn {
-            background-color: #007bff;
-            color: white;
+        .popup-content button {
             padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
-        .book-now-btn:hover {
+        .popup-content button:hover {
             background-color: #0056b3;
         }
     </style>
@@ -109,17 +75,6 @@
 <body>
 
 <div id="calendar"></div>
-
-<!-- Modal for Event Details -->
-<div id="eventModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2 id="modalEventName"></h2>
-        <p id="modalEventDescription"></p>
-        <img id="modalProviderImage" class="modal-img" src="" alt="Provider Image">
-        <button class="book-now-btn">Book Now</button>
-    </div>
-</div>
 
 <script>
     $(document).ready(function () {
@@ -174,7 +129,7 @@
                         description: provider.description || ''
                     }));
 
-                    renderCalendar(resources, token); // Pass resources directly to renderCalendar
+                    renderCalendar(resources, token);
                 } else {
                     console.error("No providers returned. Please check the API response.");
                     renderCalendar([], token); // Render empty calendar
@@ -185,7 +140,7 @@
             });
         }
 
-        function fetchEventsForRange(token, start, end, resources, callback) {
+        function fetchEventsForRange(token, start, end, callback) {
             var client = new JSONRpcClient({
                 'url': 'https://user-api.simplybook.me',
                 'headers': {
@@ -208,7 +163,7 @@
                     }
 
                     if (Array.isArray(events) && events.length > 0) {
-                        processEvents(events, token, start, end, resources, callback);
+                        processEvents(events, token, start, end, callback);
                     } else {
                         console.error("No valid events returned. Please check the API response.");
                         callback([]); // Return empty array if no events
@@ -223,7 +178,7 @@
             });
         }
 
-        function processEvents(events, token, start, end, resources, callback) {
+        function processEvents(events, token, start, end, callback) {
             var calendarEvents = [];
             var processedCount = 0;
 
@@ -246,7 +201,8 @@
                                         end: endTime,
                                         resourceId: providerId,
                                         description: event.description || '',
-                                        providerPicture: resources.find(r => r.id === providerId)?.picture || '',
+                                        category: event.categories ? event.categories[0] : '1', // Default category to 1 if not provided
+                                        service: event.id
                                     });
                                 }
 
@@ -344,10 +300,10 @@
                 timeZone: 'Australia/Sydney', // Set timezone to AEST
                 initialView: 'resourceTimeGridDay',
                 initialDate: '2024-10-29',
-                resources: resources, // Use fetched resources directly
+                resources: resources,
                 events: function (info, successCallback, failureCallback) {
                     // Fetch events for the current date range
-                    fetchEventsForRange(token, info.startStr, info.endStr, resources, successCallback);
+                    fetchEventsForRange(token, info.startStr, info.endStr, successCallback);
                 },
                 headerToolbar: {
                     left: 'prev',
@@ -376,37 +332,26 @@
                         placement: 'top', // Set the placement of the tooltip
                     });
                 },
-                eventClick: function (info) {
-                    // Show modal popup with event details
-                    var modal = document.getElementById("eventModal");
-                    var span = document.getElementsByClassName("close")[0];
+                eventClick: function(info) {
+                    // Create a modal for the popup
+                    var modal = document.createElement('div');
+                    modal.classList.add('popup-content');
+                    
+                    // Add event details to the modal
+                    modal.innerHTML = `
+                        <h3>${info.event.title}</h3>
+                        <p>${info.event.extendedProps.description}</p>
+                        <img src="${info.event.extendedProps.picture}" alt="Provider Image">
+                        <button onclick="window.open('https://thefreshlifeconference.simplybook.net/v2/#book/category/${info.event.extendedProps.category}/service/${info.event.extendedProps.service}/count/1/date/${info.event.startStr.split('T')[0]}/time/${info.event.startStr.split('T')[1].split('+')[0]}/', '_blank')">Book Now</button>
+                    `;
 
-                    document.getElementById("modalEventName").innerText = info.event.title;
-                    document.getElementById("modalEventDescription").innerHTML = info.event.extendedProps.description;
+                    // Show the modal
+                    document.body.appendChild(modal);
 
-                    // If provider picture is available
-                    if (info.event.extendedProps.providerPicture) {
-                        document.getElementById("modalProviderImage").src = info.event.extendedProps.providerPicture;
-                        document.getElementById("modalProviderImage").style.display = "block";
-                    } else {
-                        document.getElementById("modalProviderImage").style.display = "none";
-                    }
-
-                    modal.style.display = "block"; // Show the modal
-
-                    // Close the modal when the 'x' is clicked
-                    span.onclick = function() {
-                        modal.style.display = "none";
-                    };
-
-                    // Close the modal when the user clicks anywhere outside of the modal
-                    window.onclick = function(event) {
-                        if (event.target == modal) {
-                            modal.style.display = "none";
-                        }
-                    };
-
-                    info.jsEvent.preventDefault(); // Prevent default action (don't navigate)
+                    // Hide the modal when clicked outside
+                    modal.addEventListener('click', function() {
+                        document.body.removeChild(modal);
+                    });
                 },
                 slotMinTime: '08:00:00', // Set the start time of slots to match your schedule
                 slotMaxTime: '23:00:00'  // Set the end time of slots to match your schedule

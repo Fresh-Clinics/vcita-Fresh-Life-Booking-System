@@ -4,11 +4,43 @@ body {
     font-family: 'Manrope', sans-serif; /* Set global font to Manrope */
     font-size: 14px;
     text-align: center;
+    overflow: hidden; /* Prevent scrolling of the entire page */
 }
 
 #calendar {
     max-width: 1100px;
     margin: 0 auto;
+    height: 100vh; /* Set calendar height to full view height */
+    display: flex;
+    flex-direction: column; /* Make calendar and toolbar flex items */
+}
+
+.fc-view-container {
+    flex-grow: 1; /* Allow the calendar view to take remaining space */
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.fc .fc-scrollgrid-section-liquid > * {
+    overflow: visible; /* Keep the headers sticky */
+    position: sticky; /* Make headers sticky */
+    z-index: 2;
+}
+
+.fc-timegrid-axis,
+.fc-col-header-cell {
+    position: sticky; /* Keep time column and resource row sticky */
+    background: white; /* Ensure it is visible when scrolling */
+    z-index: 10; /* Make it above other content */
+}
+
+.fc-timegrid-axis {
+    left: 0; /* Stick the time column */
+    z-index: 5; /* Lower z-index than header */
+}
+
+.fc-col-header-cell {
+    top: 0; /* Stick the resource row */
+    z-index: 10; /* Higher z-index than the content */
 }
 
 .fc-timegrid-slot {
@@ -19,6 +51,9 @@ body {
     background-color: #142652 !important; /* Set event background color */
     color: white; /* Ensure text is readable */
     border: none; /* Remove border for a clean look */
+}
+
+.fc-event-content {
     padding: 5px; /* Add padding to event content */
 }
 
@@ -63,4 +98,26 @@ body {
     top: 10px;
     right: 10px;
     cursor: pointer;
+}
+
+/* Row color styles for specific times on specific dates */
+.fc-timegrid-col[data-date="2024-10-29"] .fc-timegrid-slot[data-time="13:00:00"],
+.fc-timegrid-col[data-date="2024-10-29"] .fc-timegrid-slot[data-time="15:30:00"],
+.fc-timegrid-col[data-date="2024-10-30"] .fc-timegrid-slot[data-time="11:30:00"],
+.fc-timegrid-col[data-date="2024-10-30"] .fc-timegrid-slot[data-time="13:30:00"],
+.fc-timegrid-col[data-date="2024-10-30"] .fc-timegrid-slot[data-time="16:00:00"],
+.fc-timegrid-col[data-date="2024-10-31"] .fc-timegrid-slot[data-time="11:00:00"],
+.fc-timegrid-col[data-date="2024-10-31"] .fc-timegrid-slot[data-time="13:30:00"],
+.fc-timegrid-col[data-date="2024-10-31"] .fc-timegrid-slot[data-time="16:00:00"] {
+    background-color: #ebf7f4; /* Set default row color */
+}
+
+.fc-timegrid-col[data-date="2024-10-29"] .fc-timegrid-slot[data-time="17:30:00"],
+.fc-timegrid-col[data-date="2024-10-30"] .fc-timegrid-slot[data-time="17:30:00"] {
+    background-color: #cbe4e0; /* Set alternate row color */
+}
+
+.fc-timegrid-col[data-date="2024-10-31"] .fc-timegrid-slot[data-time="18:00:00"] {
+    background-color: #0e4333; /* Dark row */
+    color: white; /* Set text color for dark row */
 }

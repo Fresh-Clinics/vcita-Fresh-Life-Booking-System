@@ -64,6 +64,31 @@ $(document).ready(function () {
         });
     }
 
+    function categorizeResourcesByColor(resources) {
+        // Define the mapping of color codes to category names
+        const colorToCategoryMap = {
+            '#34bbf1': 'Training Suites',
+            '#b07393': 'Activations Hub',
+            '#71909f': 'Wellness & Spa',
+            '#fac94e': 'Program'
+            // Add more mappings as needed
+        };
+
+        const categorizedResources = {};
+
+        // Categorize resources by color
+        resources.forEach(resource => {
+            const category = colorToCategoryMap[resource.color] || 'Uncategorized'; // Default to 'Uncategorized'
+            if (!categorizedResources[category]) {
+                categorizedResources[category] = [];
+            }
+            categorizedResources[category].push(resource);
+        });
+
+        console.log("Categorized resources by color:", categorizedResources);
+        return categorizedResources;
+    }
+
     function fetchEventsForRange(token, start, end, callback) {
         var client = new JSONRpcClient({
             'url': 'https://user-api.simplybook.me',
@@ -211,29 +236,6 @@ $(document).ready(function () {
             console.error("Error fetching end time:", error);
             callback(null);
         });
-    }
-
-    function categorizeResourcesByColor(resources) {
-        // Define the mapping of color codes to category names
-        const colorToCategoryMap = {
-            '#34bbf1': 'Training Sessions',
-            '#c6a5e2': 'Group Program'
-            // Add more mappings as needed
-        };
-
-        const categorizedResources = {};
-
-        // Categorize resources by color
-        resources.forEach(resource => {
-            const category = colorToCategoryMap[resource.color] || 'Uncategorized'; // Default to 'Uncategorized'
-            if (!categorizedResources[category]) {
-                categorizedResources[category] = [];
-            }
-            categorizedResources[category].push(resource);
-        });
-
-        console.log("Categorized resources by color:", categorizedResources);
-        return categorizedResources;
     }
 
     function renderCalendar(resources, token, categorizedResources) {

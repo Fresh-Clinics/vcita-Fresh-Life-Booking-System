@@ -237,9 +237,9 @@
                                         start: startTime,
                                         end: endTime,
                                         resourceId: providerId,
-                                        description: event.description || '',
-                                        picture: `${event.picture_path}/${event.picture}`,
-                                        category: event.category,  // Assuming category is provided in event data
+                                        description: event.description || 'No description available.',
+                                        picture: event.picture_path && event.picture ? `${event.picture_path}/${event.picture}` : null, // Handle missing picture data
+                                        category: event.category || '1',  // Default category if missing
                                         service: event.id  // Assuming service ID is the event ID
                                     });
                                 }
@@ -380,7 +380,7 @@
                     modalContent.innerHTML = `
                         <h3>${info.event.title}</h3>
                         <p>${info.event.extendedProps.description}</p>
-                        <img src="${info.event.extendedProps.picture}" alt="Provider Image">
+                        ${info.event.extendedProps.picture ? `<img src="${info.event.extendedProps.picture}" alt="Provider Image">` : ''}
                         <button class="booking-button" onclick="handleBooking('${info.event.extendedProps.category}', '${info.event.extendedProps.service}', '${info.event.startStr.split('T')[0]}', '${info.event.startStr.split('T')[1].split('+')[0]}')">Book Now</button>
                     `;
                 },

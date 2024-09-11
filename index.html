@@ -47,24 +47,21 @@
             border-top-color: #1E252B;
         }
 
-        /* Modal styling */
         .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
-            padding-top: 100px; /* Location of the box */
+            display: none;
+            position: fixed;
+            z-index: 1000;
             left: 0;
             top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgb(0,0,0); /* Fallback color */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
         }
 
         .modal-content {
             background-color: #fefefe;
-            margin: auto;
+            margin: 15% auto;
             padding: 20px;
             border: 1px solid #888;
             width: 80%;
@@ -86,16 +83,12 @@
         }
 
         .booking-button {
+            background-color: #4CAF50;
+            color: white;
             padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
             border: none;
             cursor: pointer;
             margin-top: 10px;
-        }
-
-        .booking-button:hover {
-            background-color: #0056b3;
         }
     </style>
 </head>
@@ -103,13 +96,11 @@
 
 <div id="calendar"></div>
 
-<!-- Modal -->
+<!-- Modal for Booking -->
 <div id="bookingModal" class="modal">
     <div class="modal-content">
-        <span class="close">&times;</span>
-        <div id="modalContent">
-            <!-- Dynamic content goes here -->
-        </div>
+        <span class="close" onclick="document.getElementById('bookingModal').style.display='none'">&times;</span>
+        <div id="modalContent"></div>
     </div>
 </div>
 
@@ -130,6 +121,8 @@
             loginClient.getToken('thefreshlifeconference', '5622f213016960fc53a1c61e6ac61aee0eabebcedd688b374f9761c9c6f69dce', function (token) {
                 if (token) {
                     console.log("Fetched token: ", token);
+                    // Store token globally for future use
+                    window.apiToken = token;
                     // Fetch providers and then render the calendar with the token
                     fetchProvidersAndRenderCalendar(token);
                 } else {
@@ -162,7 +155,7 @@
                         title: provider.name,
                         position: parseInt(provider.position) || 0,
                         color: provider.color || '',
-                        picture: provider.picture_path ? `${provider.picture_path}/${provider.picture}` : '',
+                        picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '',
                         description: provider.description || ''
                     }));
 
@@ -176,6 +169,189 @@
                 renderCalendar([], token); // Render empty calendar
             });
         }
+
+        function renderCalendar(resources, token) {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                height: 'auto',
+                dayMinWidth: 100,
+                slotDuration: '00:30:00',
+                schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+                timeZone: 'Australia/Sydney', // Set timezone to AEST
+                initialView: 'resourceTimeGridDay',
+                initialDate: '2024-10-29',
+                resources: resources,
+                events: function (info, successCallback, failureCallback) {
+                    // Fetch events for the current date range
+                    fetchEventsForRange(token, info.startStr, info.endStr, successCallback);
+                },
+                headerToolbar: {
+                    left: 'prev',
+                    center: 'title',
+                    right: 'next'
+                },
+                resourceOrder: 'position', // Sort resources by position
+                eventContent: function (arg) {
+                    if (arg.event && arg.event.title) {
+                        return {
+                            html: `<div class="fc-event-content">
+                                      <div class="fc-event-title">${arg.event.title}</div>
+                                   </div>`
+                        };
+                    } else {
+                        console.warn("Event data is missing or incorrect", arg.event);
+                        return { html: '<div class="fc-event-content"><div class="fc-event-title">Invalid Event</div></div>' };
+                    }
+                },
+                eventDidMount: function (info) {
+                    // Initialize tippy.js for tooltips with HTML content
+                    tippy(info.el, {
+                        content: `<strong>${info.event.title}</strong><br>${info.event.extendedProps.description}`, // Event name in bold and description below
+                        allowHTML: true, // Enable HTML in the tooltip
+                        theme: 'light-border', // Choose a theme for the tooltip
+                        placement: 'top', // Set the placement of the tooltip
+                    });
+                },
+                eventClick: function (info) {
+                    var category = info.event.extendedProps.category;
+                    var service = info.event.id;
+                    var date = info.event.startStr.split('T')[0];
+                    var time = info.event.startStr.split('T')[1];
+
+                    console.log(`Booking: Category ${category}, Service ${service}, Date ${date}, Time ${time}`);
+
+                    // Show booking modal with dynamic content
+                    $('#modalContent').html(`
+                        <h3>${info.event.title}</h3>
+                        <p>${info.event.extendedProps.description}</p>
+                        <img src="${info.event.extendedProps.picture}" alt="${info.event.title} image" style="max-width: 100%;"/>
+                        <button class="booking-button" onclick="handleBooking('${category}', '${service}', '${date}', '${time}')">Book Now</button>
+                    `);
+                    $('#bookingModal').show();
+                },
+                slotMinTime: '08:00:00', // Set the start time of slots to match your schedule
+                slotMaxTime: '23:00:00'  // Set the end time of slots to match your schedule
+            });
+
+            calendar.render();
+            console.log("Calendar rendered with events.");
+        }
+
+        // Additional functions to handle booking and client info
+        window.handleBooking = function (category, service, date, time) {
+            if (!window.clientToken) {
+                // If client not logged in, show login form
+                showClientLoginForm();
+            } else {
+                // If logged in, proceed to fetch client info
+                fetchClientInfo(function(clientInfo) {
+                    if (clientInfo) {
+                        // Prefill and show booking form
+                        showBookingForm(clientInfo, category, service, date, time);
+                    } else {
+                        alert('Failed to retrieve client info. Please try logging in again.');
+                        showClientLoginForm();
+                    }
+                });
+            }
+        };
+
+        function showClientLoginForm() {
+            // Show a simple login form in the modal
+            $('#modalContent').html(`
+                <h3>Login to Book</h3>
+                <input type="email" id="clientEmail" placeholder="Enter your email" required>
+                <input type="password" id="clientPassword" placeholder="Enter your password" required>
+                <button class="booking-button" onclick="loginClient()">Login</button>
+            `);
+        }
+
+        window.loginClient = function () {
+            var email = $('#clientEmail').val();
+            var password = $('#clientPassword').val();
+
+            // Call SimplyBook API to log in the client
+            var client = new JSONRpcClient({
+                'url': 'https://user-api.simplybook.me',
+                'headers': {
+                    'X-Company-Login': 'thefreshlifeconference',
+                    'X-Token': window.apiToken
+                },
+                'onerror': function (error) {
+                    console.error("Error in JSON-RPC client setup:", error);
+                }
+            });
+
+            client.request('loginClient', [email, password], function (response) {
+                if (response && response.token) {
+                    console.log('Client logged in:', response);
+                    window.clientToken = response.token; // Store client token globally
+                    alert('Successfully logged in!');
+                } else {
+                    alert('Login failed. Please check your credentials and try again.');
+                }
+            }, function (error) {
+                console.error("Error logging in client:", error);
+                alert('Login failed. Please check your credentials and try again.');
+            });
+        };
+
+        function fetchClientInfo(callback) {
+            var client = new JSONRpcClient({
+                'url': 'https://user-api.simplybook.me',
+                'headers': {
+                    'X-Company-Login': 'thefreshlifeconference',
+                    'X-Token': window.clientToken // Use client token for authenticated requests
+                },
+                'onerror': function (error) {
+                    console.error("Error in JSON-RPC client setup:", error);
+                }
+            });
+
+            client.request('getClientInfo', [], function (clientInfo) {
+                console.log('Fetched client info:', clientInfo);
+                callback(clientInfo);
+            }, function (error) {
+                console.error("Error fetching client info:", error);
+                callback(null);
+            });
+        }
+
+        function showBookingForm(clientInfo, category, service, date, time) {
+            // Display the booking form prefilled with client info
+            $('#modalContent').html(`
+                <h3>Booking for ${clientInfo.name}</h3>
+                <p>Service: ${service}, Date: ${date}, Time: ${time}</p>
+                <button class="booking-button" onclick="confirmBooking('${category}', '${service}', '${date}', '${time}')">Confirm Booking</button>
+            `);
+        }
+
+        window.confirmBooking = function (category, service, date, time) {
+            var client = new JSONRpcClient({
+                'url': 'https://user-api.simplybook.me',
+                'headers': {
+                    'X-Company-Login': 'thefreshlifeconference',
+                    'X-Token': window.clientToken
+                },
+                'onerror': function (error) {
+                    console.error("Error in JSON-RPC client setup:", error);
+                }
+            });
+
+            client.request('makeBooking', [category, service, { from: date, to: time }], function (result) {
+                if (result) {
+                    console.log("Booking made successfully:", result);
+                    alert('Booking made successfully');
+                    $('#bookingModal').hide();
+                } else {
+                    console.error("Failed to make booking.");
+                    alert('Failed to make booking.');
+                }
+            }, function (error) {
+                console.error("Error making booking:", error);
+                alert('Error making booking.');
+            });
+        };
 
         function fetchEventsForRange(token, start, end, callback) {
             var client = new JSONRpcClient({
@@ -237,10 +413,7 @@
                                         start: startTime,
                                         end: endTime,
                                         resourceId: providerId,
-                                        description: event.description || '',
-                                        picture: event.picture_path ? `${event.picture_path}/${event.picture}` : '',
-                                        category: event.categories[0] || '1',  // Example: setting a default category if missing
-                                        service: event.id  // Assuming service ID is the event ID
+                                        description: event.description || ''
                                     });
                                 }
 
@@ -265,11 +438,6 @@
                     }
                 }
             });
-        }
-
-        function isDateInRange(date, start, end) {
-            const dateObj = new Date(date);
-            return dateObj >= new Date(start) && dateObj <= new Date(end); // Check if date is within the range
         }
 
         function fetchEventStartTime(token, eventId, unitId, from, to, callback) {
@@ -327,105 +495,6 @@
                 callback(null);
             });
         }
-
-        function renderCalendar(resources, token) {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                height: 'auto',
-                dayMinWidth: 100,
-                slotDuration: '00:30:00',
-                schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
-                timeZone: 'Australia/Sydney', // Set timezone to AEST
-                initialView: 'resourceTimeGridDay',
-                initialDate: '2024-10-29',
-                resources: resources,
-                events: function (info, successCallback, failureCallback) {
-                    // Fetch events for the current date range
-                    fetchEventsForRange(token, info.startStr, info.endStr, successCallback);
-                },
-                headerToolbar: {
-                    left: 'prev',
-                    center: 'title',
-                    right: 'next'
-                },
-                resourceOrder: 'position', // Sort resources by position
-                eventContent: function (arg) {
-                    if (arg.event && arg.event.title) {
-                        return {
-                            html: `<div class="fc-event-content">
-                                      <div class="fc-event-title">${arg.event.title}</div>
-                                   </div>`
-                        };
-                    } else {
-                        console.warn("Event data is missing or incorrect", arg.event);
-                        return { html: '<div class="fc-event-content"><div class="fc-event-title">Invalid Event</div></div>' };
-                    }
-                },
-                eventDidMount: function (info) {
-                    // Initialize tippy.js for tooltips with HTML content
-                    tippy(info.el, {
-                        content: `<strong>${info.event.title}</strong><br>${info.event.extendedProps.description}`, // Event name in bold and description below
-                        allowHTML: true, // Enable HTML in the tooltip
-                        theme: 'light-border', // Choose a theme for the tooltip
-                        placement: 'top', // Set the placement of the tooltip
-                    });
-                },
-                eventClick: function(info) {
-                    // Show the modal
-                    var modal = document.getElementById('bookingModal');
-                    modal.style.display = "block";
-
-                    // Populate the modal with event details and the booking form
-                    var modalContent = document.getElementById('modalContent');
-                    modalContent.innerHTML = `
-                        <h3>${info.event.title}</h3>
-                        <p>${info.event.extendedProps.description}</p>
-                        ${info.event.extendedProps.picture ? `<img src="${info.event.extendedProps.picture}" alt="Provider Image">` : ''}
-                        <button class="booking-button" onclick="handleBooking('${info.event.extendedProps.category}', '${info.event.extendedProps.service}', '${info.event.startStr.split('T')[0]}', '${info.event.startStr.split('T')[1].split('+')[0]}')">Book Now</button>
-                    `;
-                },
-                slotMinTime: '08:00:00', // Set the start time of slots to match your schedule
-                slotMaxTime: '23:00:00'  // Set the end time of slots to match your schedule
-            });
-
-            calendar.render();
-            console.log("Calendar rendered with events.");
-
-            // Close the modal when the user clicks on <span> (x)
-            document.querySelector('.close').onclick = function() {
-                document.getElementById('bookingModal').style.display = "none";
-            };
-        }
-
-        // Make handleBooking globally accessible
-        window.handleBooking = function (category, service, date, time) {
-            // Here, make API calls to SimplyBook.me to create the booking or handle the booking workflow
-            console.log(`Booking: Category ${category}, Service ${service}, Date ${date}, Time ${time}`);
-            
-            // Initialize JSON-RPC Client for SimplyBook API to make a booking
-            var client = new JSONRpcClient({
-                'url': 'https://user-api.simplybook.me',
-                'headers': {
-                    'X-Company-Login': 'thefreshlifeconference',
-                    'X-Token': 'your-auth-token'  // Add your valid auth token here
-                },
-                'onerror': function (error) {
-                    console.error("Error in JSON-RPC client setup:", error);
-                }
-            });
-
-            client.request('makeBooking', [category, service, { from: date, to: time }], function (result) {
-                if (result) {
-                    console.log("Booking made successfully:", result);
-                    alert('Booking made successfully');
-                } else {
-                    console.error("Failed to make booking.");
-                    alert('Failed to make booking.');
-                }
-            }, function (error) {
-                console.error("Error making booking:", error);
-            });
-        };
     });
 </script>
 

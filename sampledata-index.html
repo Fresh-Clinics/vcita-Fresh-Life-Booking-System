@@ -92,6 +92,13 @@
             right: 10px;
             cursor: pointer;
         }
+
+        .fc-category-header {
+            font-weight: bold;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 5px;
+        }
     </style>
 </head>
 <body>
@@ -101,7 +108,7 @@
 <!-- Custom Scripts -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Sample data for resources
+        // Sample data for resources with categories
         const resources = [
             { id: '1', title: 'Woodlands Stage', category: 'Program' },
             { id: '2', title: 'Fresh Lounge', category: 'Program' },
@@ -130,6 +137,9 @@
             { id: '25', title: 'Wellness Sessions', category: 'Wellness & Spa' },
             { id: '26', title: 'The Fresh Spa', category: 'Wellness & Spa' }
         ];
+
+        // Group resources by category
+        const groupedResources = groupResourcesByCategory(resources);
 
         // Sample data for events
         const events = [
@@ -172,8 +182,7 @@
                 right: 'next'
             },
             dayMinWidth: 150, // Set column width
-            resourceGroupField: 'category', // Group by category field
-            resources: resources,
+            resources: groupedResources,
             events: events,
             height: 'auto',
             slotMinTime: '08:00:00',
@@ -214,6 +223,25 @@
         });
 
         calendar.render();
+
+        // Function to group resources by category
+        function groupResourcesByCategory(resources) {
+            const grouped = [];
+            const categories = [...new Set(resources.map(resource => resource.category))]; // Get unique categories
+
+            categories.forEach(category => {
+                grouped.push({ id: category, title: category, children: [] }); // Category header
+
+                // Push resources under each category
+                resources
+                    .filter(resource => resource.category === category)
+                    .forEach(resource => {
+                        grouped[grouped.length - 1].children.push(resource);
+                    });
+            });
+
+            return grouped;
+        }
     });
 </script>
 

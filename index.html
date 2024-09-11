@@ -238,7 +238,7 @@
                                         end: endTime,
                                         resourceId: providerId,
                                         description: event.description || 'No description available.',
-                                        picture: event.picture_path && event.picture ? `${event.picture_path}/${event.picture}` : null, // Handle missing picture data
+                                        picture: event.picture_path && event.picture ? `${event.picture_path}/${event.picture}` : null,
                                         category: event.category || '1',  // Default category if missing
                                         service: event.id  // Assuming service ID is the event ID
                                     });
@@ -401,7 +401,30 @@
         window.handleBooking = function (category, service, date, time) {
             // Here, make API calls to SimplyBook.me to create the booking or handle the booking workflow
             console.log(`Booking: Category ${category}, Service ${service}, Date ${date}, Time ${time}`);
-            // The booking URL will dynamically be formed based on the event data and client info
+            
+            // Initialize JSON-RPC Client for SimplyBook API to make a booking
+            var client = new JSONRpcClient({
+                'url': 'https://user-api.simplybook.me',
+                'headers': {
+                    'X-Company-Login': 'thefreshlifeconference',
+                    'X-Token': 'your-auth-token'  // Add your valid auth token here
+                },
+                'onerror': function (error) {
+                    console.error("Error in JSON-RPC client setup:", error);
+                }
+            });
+
+            client.request('makeBooking', [category, service, { from: date, to: time }], function (result) {
+                if (result) {
+                    console.log("Booking made successfully:", result);
+                    alert('Booking made successfully');
+                } else {
+                    console.error("Failed to make booking.");
+                    alert('Failed to make booking.');
+                }
+            }, function (error) {
+                console.error("Error making booking:", error);
+            });
         };
     });
 </script>

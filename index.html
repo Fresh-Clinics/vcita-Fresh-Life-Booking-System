@@ -80,14 +80,10 @@
             color: #999;
         }
 
-        .popup-button {
+        .popup-message {
             margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
         }
     </style>
 </head>
@@ -368,7 +364,7 @@
                             <h2>${event.title}</h2>
                             <p>${event.extendedProps.description}</p>
                             <img src="${event.extendedProps.picture || ''}" alt="Provider Image" style="max-width: 100%;">
-                            <button class="popup-button" onclick="confirmBooking('${category}', '${service}', '${date}', '${time}')">Book Now</button>
+                            <div class="popup-message"><strong>Bookings open at 7pm AEST Monday 23rd October</strong></div>
                         </div>
                     `;
                     document.body.appendChild(popup);
@@ -380,13 +376,6 @@
             calendar.render();
             console.log("Calendar rendered with events.");
         }
-
-        // Define confirmBooking in the global scope
-        window.confirmBooking = function (category, service, date, time) {
-            console.log(`Booking: Category ${category}, Service ${service}, Date ${date}, Time ${time}`);
-            // Add booking logic here, making API calls to SimplyBook.me to perform the booking.
-            // Example API call can be placed here based on SimplyBook.me's API documentation.
-        };
     });
 </script>
 

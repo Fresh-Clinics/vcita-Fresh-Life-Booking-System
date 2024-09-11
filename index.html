@@ -59,7 +59,7 @@
         // Initialize JSON-RPC Client for SimplyBook API to fetch the token
         try {
             var loginClient = new JSONRpcClient({
-                'url': 'https://user-api.simplybook.me',
+                'url': 'https://user-api.simplybook.me/login',
                 'onerror': function (error) {
                     console.error("Login Error:", error);
                 }
@@ -274,7 +274,7 @@
                 timeZone: 'Australia/Sydney', // Set timezone to AEST
                 initialView: 'resourceTimeGridDay',
                 initialDate: '2024-10-29',
-                resources: resources, // Load resources directly
+                resources: resources,
                 events: function (info, successCallback, failureCallback) {
                     // Fetch events for the current date range
                     fetchEventsForRange(token, info.startStr, info.endStr, successCallback);
@@ -300,7 +300,7 @@
                 eventDidMount: function (info) {
                     // Initialize tippy.js for tooltips with HTML content
                     tippy(info.el, {
-                        content: `<strong>${info.event.title}</strong><br>${info.event.extendedProps.description}`, // Event name in bold and description below
+                         content: `<strong>${info.event.title}</strong><br>${info.event.extendedProps.description}`, // Event name in bold and description below
                         allowHTML: true, // Enable HTML in the tooltip
                         theme: 'light-border', // Choose a theme for the tooltip
                         placement: 'top', // Set the placement of the tooltip

@@ -128,6 +128,15 @@
             width: 150px; /* Fixed width for hidden column */
             background-color: #eaeaea;
         }
+
+        .fc-col-header-cell {
+            transition: width 0.2s;
+        }
+
+        .fc-category-cell.collapsed {
+            max-width: 150px;
+            width: 150px;
+        }
     </style>
 </head>
 <body>
@@ -139,32 +148,36 @@
     document.addEventListener('DOMContentLoaded', function () {
         // Sample data for resources with categories
         const resources = [
-            { id: '1', title: 'Woodlands Stage', category: 'Program', order_id: '1' },
-            { id: '2', title: 'Fresh Lounge', category: 'Program', order_id: '2' },
-            { id: '3', title: 'Merz | Room 1', category: 'Training Suites', order_id: '3' },
-            { id: '4', title: 'Merz | Room 2', category: 'Training Suites', order_id: '4' },
-            { id: '5', title: 'Galderma | Room 1', category: 'Training Suites', order_id: '5' },
-            { id: '6', title: 'Galderma | Room 2', category: 'Training Suites', order_id: '6' },
-            { id: '7', title: 'Allergan', category: 'Training Suites', order_id: '7' },
-            { id: '8', title: 'Evolus', category: 'Training Suites', order_id: '8' },
-            { id: '9', title: 'Candela', category: 'Training Suites', order_id: '9' },
-            { id: '10', title: 'Cryomed', category: 'Training Suites', order_id: '10' },
-            { id: '11', title: 'Dermocosmetica | Room 1', category: 'Training Suites', order_id: '11' },
-            { id: '12', title: 'Dermocosmetica | Room 2', category: 'Training Suites', order_id: '12' },
-            { id: '13', title: 'EnVogue', category: 'Training Suites', order_id: '13' },
-            { id: '14', title: 'Hugel', category: 'Training Suites', order_id: '14' },
-            { id: '15', title: 'Rejuran', category: 'Training Suites', order_id: '15' },
-            { id: '16', title: 'Teoxane', category: 'Training Suites', order_id: '16' },
-            { id: '17', title: 'Xytide', category: 'Training Suites', order_id: '17' },
-            { id: '18', title: 'Fresh Clinics | Room 1', category: 'Training Suites', order_id: '18' },
-            { id: '19', title: 'Fresh Clinics | Room 2', category: 'Training Suites', order_id: '19' },
-            { id: '20', title: 'Venus Concept', category: 'Activations Hub', order_id: '20' },
-            { id: '21', title: 'Alma', category: 'Activations Hub', order_id: '21' },
-            { id: '22', title: 'Advanced Skin Technology', category: 'Activations Hub', order_id: '22' },
-            { id: '23', title: 'Fresh Tech Hub', category: 'Activations Hub', order_id: '23' },
-            { id: '24', title: 'The Skincare Company', category: 'Activations Hub', order_id: '24' },
-            { id: '25', title: 'Wellness Sessions', category: 'Wellness & Spa', order_id: '25' },
-            { id: '26', title: 'The Fresh Spa', category: 'Wellness & Spa', order_id: '26' }
+            { id: '1', title: 'Woodlands Stage', category: 'Program', order_id: '1', visible: '1' },
+            { id: '2', title: 'Fresh Lounge', category: 'Program', order_id: '2', visible: '1' },
+            { id: '3', title: 'Merz | Room 1', category: 'Training Suites', order_id: '3', visible: '1' },
+            { id: '4', title: 'Merz | Room 2', category: 'Training Suites', order_id: '4', visible: '1' },
+            { id: '5', title: 'Galderma | Room 1', category: 'Training Suites', order_id: '5', visible: '1' },
+            { id: '6', title: 'Galderma | Room 2', category: 'Training Suites', order_id: '6', visible: '1' },
+            { id: '7', title: 'Allergan', category: 'Training Suites', order_id: '7', visible: '1' },
+            { id: '8', title: 'Evolus', category: 'Training Suites', order_id: '8', visible: '1' },
+            { id: '9', title: 'Candela', category: 'Training Suites', order_id: '9', visible: '1' },
+            { id: '10', title: 'Cryomed', category: 'Training Suites', order_id: '10', visible: '1' },
+            { id: '11', title: 'Dermocosmetica | Room 1', category: 'Training Suites', order_id: '11', visible: '1' },
+            { id: '12', title: 'Dermocosmetica | Room 2', category: 'Training Suites', order_id: '12', visible: '1' },
+            { id: '13', title: 'EnVogue', category: 'Training Suites', order_id: '13', visible: '1' },
+            { id: '14', title: 'Hugel', category: 'Training Suites', order_id: '14', visible: '1' },
+            { id: '15', title: 'Rejuran', category: 'Training Suites', order_id: '15', visible: '1' },
+            { id: '16', title: 'Teoxane', category: 'Training Suites', order_id: '16', visible: '1' },
+            { id: '17', title: 'Xytide', category: 'Training Suites', order_id: '17', visible: '1' },
+            { id: '18', title: 'Fresh Clinics | Room 1', category: 'Training Suites', order_id: '18', visible: '1' },
+            { id: '19', title: 'Fresh Clinics | Room 2', category: 'Training Suites', order_id: '19', visible: '1' },
+            { id: '20', title: 'Venus Concept', category: 'Activations Hub', order_id: '20', visible: '1' },
+            { id: '21', title: 'Alma', category: 'Activations Hub', order_id: '21', visible: '1' },
+            { id: '22', title: 'Advanced Skin Technology', category: 'Activations Hub', order_id: '22', visible: '1' },
+            { id: '23', title: 'Fresh Tech Hub', category: 'Activations Hub', order_id: '23', visible: '1' },
+            { id: '24', title: 'The Skincare Company', category: 'Activations Hub', order_id: '24', visible: '1' },
+            { id: '25', title: 'Wellness Sessions', category: 'Wellness & Spa', order_id: '25', visible: '1' },
+            { id: '26', title: 'The Fresh Spa', category: 'Wellness & Spa', order_id: '26', visible: '1' },
+            { id: '27', title: ' ', category: 'Program', order_id: '0', visible: '0' },
+            { id: '28', title: ' ', category: 'Training Suites', order_id: '0', visible: '0' },
+            { id: '29', title: ' ', category: 'Activations Hub', order_id: '0', visible: '0' },
+            { id: '30', title: ' ', category: 'Wellness & Spa', order_id: '0', visible: '0' }
         ];
 
         // Sort resources by order_id

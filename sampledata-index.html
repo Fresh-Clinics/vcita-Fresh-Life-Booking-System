@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sample Calendar with Categories and Resources</title>
+    <title>Sample Calendar with Expandable Categories and Resources</title>
 
     <!-- Include FullCalendar Scheduler CSS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@6.1.15/index.global.min.css" rel="stylesheet" />
@@ -93,19 +93,12 @@
             cursor: pointer;
         }
 
-        .fc-category-header {
-            font-weight: bold;
-            text-align: center;
-            background-color: #f0f0f0;
-            padding: 5px;
-            border-right: 1px solid #ddd;
-        }
-
         .fc-category-row {
             display: flex;
             justify-content: center;
             background-color: #eaeaea;
             padding: 5px 0;
+            cursor: pointer;
         }
 
         .fc-category-cell {
@@ -114,6 +107,19 @@
             padding: 5px;
             font-weight: bold;
             border-right: 1px solid #ddd;
+            position: relative;
+        }
+
+        .fc-category-cell .fc-category-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        .fc-resource-row.hidden {
+            display: none;
         }
     </style>
 </head>
@@ -200,18 +206,6 @@
             height: 'auto',
             slotMinTime: '08:00:00',
             slotMaxTime: '23:00:00',
-            resourceAreaHeaderContent: 'Category/Resource', // Custom header content for resources area
-            resourceAreaColumns: [
-                {
-                    group: true, // Enable grouping
-                    labelText: 'Category',
-                    field: 'category'
-                },
-                {
-                    headerContent: 'Resource',
-                    field: 'title'
-                }
-            ],
             eventContent: function (arg) {
                 if (arg.event && arg.event.title) {
                     return {
@@ -249,20 +243,30 @@
 
         calendar.render();
 
-        // Function to add category headers above resources
+        // Function to add category headers with expandable functionality
         function addCategoryHeaders() {
-            const headerRow = calendarEl.querySelector('.fc-col-header .fc-col-header-cell');
+            const headerRow = calendarEl.querySelector('.fc-col-header .fc-col-header-cell').parentElement;
 
             if (headerRow) {
-                const categoryRow = document.createElement('div');
+                const categoryRow = document.createElement('tr');
                 categoryRow.className = 'fc-category-row';
 
                 const categories = [...new Set(resources.map(resource => resource.category))]; // Unique categories
                 categories.forEach(category => {
-                    const categoryCell = document.createElement('div');
+                    const categoryCell = document.createElement('th');
                     categoryCell.className = 'fc-category-cell';
-                    categoryCell.innerText = category;
+                    categoryCell.innerHTML = `
+                        <span>${category}</span>
+                        <span class="fc-category-toggle">+</span>
+                    `;
                     categoryCell.style.width = `${getCategoryWidth(category)}px`; // Calculate width dynamically
+
+                    // Toggle visibility of resources under the category
+                    categoryCell.querySelector('.fc-category-toggle').addEventListener('click', function () {
+                        toggleCategoryResources(category);
+                        this.textContent = this.textContent === '+' ? '-' : '+';
+                    });
+
                     categoryRow.appendChild(categoryCell);
                 });
 
@@ -276,7 +280,16 @@
             return resourcesInCategory.length * 150; // Multiply by column width
         }
 
-        calendar.on('datesDidUpdate', addCategoryHeaders); // Call this function when dates change
+        function toggleCategoryResources(category) {
+            // Show/hide resources under a specific category
+            const resourcesInCategory = resources.filter(resource => resource.category === category);
+            resourcesInCategory.forEach(resource => {
+                const resourceHeader = document.querySelector(`[data-resource-id="${resource.id}"]`).parentElement;
+                resourceHeader.classList.toggle('hidden');
+            });
+        }
+
+        addCategoryHeaders(); // Call the function once the calendar is rendered
     });
 </script>
 

@@ -112,36 +112,36 @@
     document.addEventListener('DOMContentLoaded', function () {
         // Sample data for resources with order and category
         const resources = [
-            { id: '1', title: 'Woodlands Stage', category: 'Program', order_id: '1' },
-            { id: '2', title: 'Fresh Lounge', category: 'Program', order_id: '2' },
-            { id: '3', title: 'Merz | Room 1', category: 'Training Suites', order_id: '3' },
-            { id: '4', title: 'Merz | Room 2', category: 'Training Suites', order_id: '4' },
-            { id: '5', title: 'Galderma | Room 1', category: 'Training Suites', order_id: '5' },
-            { id: '6', title: 'Galderma | Room 2', category: 'Training Suites', order_id: '6' },
-            { id: '7', title: 'Allergan', category: 'Training Suites', order_id: '7' },
-            { id: '8', title: 'Evolus', category: 'Training Suites', order_id: '8' },
-            { id: '9', title: 'Candela', category: 'Training Suites', order_id: '9' },
-            { id: '10', title: 'Cryomed', category: 'Training Suites', order_id: '10' },
-            { id: '11', title: 'Dermocosmetica | Room 1', category: 'Training Suites', order_id: '11' },
-            { id: '12', title: 'Dermocosmetica | Room 2', category: 'Training Suites', order_id: '12' },
-            { id: '13', title: 'EnVogue', category: 'Training Suites', order_id: '13' },
-            { id: '14', title: 'Hugel', category: 'Training Suites', order_id: '14' },
-            { id: '15', title: 'Rejuran', category: 'Training Suites', order_id: '15' },
-            { id: '16', title: 'Teoxane', category: 'Training Suites', order_id: '16' },
-            { id: '17', title: 'Xytide', category: 'Training Suites', order_id: '17' },
-            { id: '18', title: 'Fresh Clinics | Room 1', category: 'Training Suites', order_id: '18' },
-            { id: '19', title: 'Fresh Clinics | Room 2', category: 'Training Suites', order_id: '19' },
-            { id: '20', title: 'Venus Concept', category: 'Activations Hub', order_id: '20' },
-            { id: '21', title: 'Alma', category: 'Activations Hub', order_id: '21' },
-            { id: '22', title: 'Advanced Skin Technology', category: 'Activations Hub', order_id: '22' },
-            { id: '23', title: 'Fresh Tech Hub', category: 'Activations Hub', order_id: '23' },
-            { id: '24', title: 'The Skincare Company', category: 'Activations Hub', order_id: '24' },
-            { id: '25', title: 'Wellness Sessions', category: 'Wellness & Spa', order_id: '25' },
-            { id: '26', title: 'The Fresh Spa', category: 'Wellness & Spa', order_id: '26' }
+            { id: '1', title: 'Woodlands Stage', category: 'Program', order_id: 1 },
+            { id: '2', title: 'Fresh Lounge', category: 'Program', order_id: 2 },
+            { id: '3', title: 'Merz | Room 1', category: 'Training Suites', order_id: 3 },
+            { id: '4', title: 'Merz | Room 2', category: 'Training Suites', order_id: 4 },
+            { id: '5', title: 'Galderma | Room 1', category: 'Training Suites', order_id: 5 },
+            { id: '6', title: 'Galderma | Room 2', category: 'Training Suites', order_id: 6 },
+            { id: '7', title: 'Allergan', category: 'Training Suites', order_id: 7 },
+            { id: '8', title: 'Evolus', category: 'Training Suites', order_id: 8 },
+            { id: '9', title: 'Candela', category: 'Training Suites', order_id: 9 },
+            { id: '10', title: 'Cryomed', category: 'Training Suites', order_id: 10 },
+            { id: '11', title: 'Dermocosmetica | Room 1', category: 'Training Suites', order_id: 11 },
+            { id: '12', title: 'Dermocosmetica | Room 2', category: 'Training Suites', order_id: 12 },
+            { id: '13', title: 'EnVogue', category: 'Training Suites', order_id: 13 },
+            { id: '14', title: 'Hugel', category: 'Training Suites', order_id: 14 },
+            { id: '15', title: 'Rejuran', category: 'Training Suites', order_id: 15 },
+            { id: '16', title: 'Teoxane', category: 'Training Suites', order_id: 16 },
+            { id: '17', title: 'Xytide', category: 'Training Suites', order_id: 17 },
+            { id: '18', title: 'Fresh Clinics | Room 1', category: 'Training Suites', order_id: 18 },
+            { id: '19', title: 'Fresh Clinics | Room 2', category: 'Training Suites', order_id: 19 },
+            { id: '20', title: 'Venus Concept', category: 'Activations Hub', order_id: 20 },
+            { id: '21', title: 'Alma', category: 'Activations Hub', order_id: 21 },
+            { id: '22', title: 'Advanced Skin Technology', category: 'Activations Hub', order_id: 22 },
+            { id: '23', title: 'Fresh Tech Hub', category: 'Activations Hub', order_id: 23 },
+            { id: '24', title: 'The Skincare Company', category: 'Activations Hub', order_id: 24 },
+            { id: '25', title: 'Wellness Sessions', category: 'Wellness & Spa', order_id: 25 },
+            { id: '26', title: 'The Fresh Spa', category: 'Wellness & Spa', order_id: 26 }
         ];
 
         // Ensure resources are sorted by order_id correctly as numbers
-        const sortedResources = resources.sort((a, b) => parseInt(a.order_id) - parseInt(b.order_id));
+        const sortedResources = resources.sort((a, b) => a.order_id - b.order_id);
 
         // Render the calendar
         var calendarEl = document.getElementById('calendar');

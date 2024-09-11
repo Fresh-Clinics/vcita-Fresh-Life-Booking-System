@@ -48,28 +48,17 @@ $(document).ready(function () {
                     color: provider.color || '',
                     picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '',
                     description: provider.description || '',
-                    category: provider.category || '' // Add category info here
+                    category: provider.categories[0] // Assuming the first category is the one to display
                 }));
 
-                // Extract unique categories
-                const categories = {};
-                resources.forEach(resource => {
-                    if (resource.category) {
-                        if (!categories[resource.category]) {
-                            categories[resource.category] = [];
-                        }
-                        categories[resource.category].push(resource);
-                    }
-                });
-
-                renderCalendar(resources, categories, token);
+                renderCalendar(resources, token);
             } else {
                 console.error("No providers returned. Please check the API response.");
-                renderCalendar([], {}, token); // Render empty calendar
+                renderCalendar([], token); // Render empty calendar
             }
         }, function (error) {
             console.error("Error fetching providers:", error);
-            renderCalendar([], {}, token); // Render empty calendar
+            renderCalendar([], token); // Render empty calendar
         });
     }
 
@@ -222,7 +211,7 @@ $(document).ready(function () {
         });
     }
 
-    function renderCalendar(resources, categories, token) {
+    function renderCalendar(resources, token) {
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             height: 'auto',
@@ -234,6 +223,10 @@ $(document).ready(function () {
             initialDate: '2024-10-29',
             allDaySlot: false, // Remove 'All Day' slot
             resources: resources,
+            events: function (info, successCallback, failureCallback) {
+                // Fetch events for the current date range
+                fetchEventsForRange(token, info.startStr, info.endStr, successCallback);
+            },
             headerToolbar: {
                 left: 'prev',
                 center: 'title',
@@ -285,37 +278,30 @@ $(document).ready(function () {
                 document.body.appendChild(popup);
             },
             slotMinTime: '08:00:00', // Set the start time of slots to match your schedule
-            slotMaxTime: '23:00:00',  // Set the end time of slots to match your schedule
-
-            // Use the datesSet callback to add the category row after rendering
-            datesSet: function () {
-                renderCategoriesRow(categories);
-            }
+            slotMaxTime: '23:00:00'  // Set the end time of slots to match your schedule
         });
 
         calendar.render();
         console.log("Calendar rendered with events.");
+
+        renderCategoriesRow(resources);
     }
 
-    function renderCategoriesRow(categories) {
-        // Create a new row for categories
-        const calendarHeader = document.querySelector('.fc-col-header');
-        if (!calendarHeader) {
-            console.error('Calendar header not found.');
-            return;
-        }
-
+    function renderCategoriesRow(resources) {
+        const uniqueCategories = [...new Set(resources.map(resource => resource.category))].filter(Boolean);
         const categoryRow = document.createElement('div');
-        categoryRow.className = 'fc-col-header-category-row';
+        categoryRow.className = 'fc-category-row';
 
-        Object.keys(categories).forEach(category => {
+        uniqueCategories.forEach(category => {
             const categoryCell = document.createElement('div');
-            categoryCell.className = 'fc-col-header-cell';
+            categoryCell.className = 'fc-category-cell';
             categoryCell.innerText = category;
-            categoryCell.style.gridColumn = `span ${categories[category].length}`; // Span across resources
             categoryRow.appendChild(categoryCell);
         });
 
-        calendarHeader.insertAdjacentElement('beforebegin', categoryRow); // Insert the category row before the resource row
+        const headerRow = document.querySelector('.fc-col-header.fc-widget-header');
+        if (headerRow) {
+            headerRow.insertAdjacentElement('beforebegin', categoryRow);
+        }
     }
 });

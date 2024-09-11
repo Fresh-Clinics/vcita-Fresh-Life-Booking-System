@@ -38,13 +38,14 @@ $(document).ready(function () {
         });
 
         // Function to handle retry with exponential backoff
-        function retryRequest(requestFunc, retries = 3, delay = 1000) {
+        function retryRequest(requestFunc, retries = 5, delay = 1000) {
             requestFunc().catch(error => {
-                if (retries > 0) {
-                    console.warn(`Retrying in ${delay}ms... (${retries} attempts left)`);
-                    setTimeout(() => retryRequest(requestFunc, retries - 1, delay * 2), delay);
+                if (error.message === 'Too many requests' && retries > 0) {
+                    const nextDelay = delay * 2; // Exponential backoff
+                    console.warn(`Too many requests. Retrying in ${nextDelay}ms... (${retries} attempts left)`);
+                    setTimeout(() => retryRequest(requestFunc, retries - 1, nextDelay), nextDelay);
                 } else {
-                    console.error("Failed after multiple retries:", error);
+                    console.error("Failed after multiple retries or a different error occurred:", error);
                 }
             });
         }
@@ -75,9 +76,13 @@ $(document).ready(function () {
                         reject(new Error("No providers returned"));
                     }
                 }, function (error) {
-                    console.error("Error fetching providers:", error);
-                    renderCalendar([], token, {}); // Render empty calendar
-                    reject(error); // Reject the promise on error
+                    if (error && error.message === 'Too many requests') {
+                        reject(new Error('Too many requests'));
+                    } else {
+                        console.error("Error fetching providers:", error);
+                        renderCalendar([], token, {}); // Render empty calendar
+                        reject(error); // Reject the promise on error
+                    }
                 });
             });
         });

@@ -89,6 +89,16 @@
             right: 10px;
             cursor: pointer;
         }
+
+        /* Custom row height */
+        .fc .fc-timegrid-slot {
+            height: 6em; /* Update row height */
+        }
+
+        /* Custom business hours styling */
+        .fc-non-business {
+            background-color: #0e4333 !important; /* Set blocked out time background color */
+        }
     </style>
 </head>
 <body>
@@ -178,6 +188,28 @@
             slotMinTime: '08:00:00',
             slotMaxTime: '23:00:00',
             resourceOrder: 'order_id', // Order by order_id
+            businessHours: [
+                {
+                    daysOfWeek: [2], // Tuesday
+                    startTime: '14:30', // 2:30 PM
+                    endTime: '15:00'   // 3:00 PM
+                },
+                {
+                    daysOfWeek: [2], // Tuesday
+                    startTime: '17:30', // 5:30 PM
+                    endTime: '18:30'   // 6:30 PM
+                },
+                {
+                    daysOfWeek: [3], // Wednesday
+                    startTime: '11:30', // 11:30 AM
+                    endTime: '12:00'   // 12:00 PM
+                },
+                {
+                    daysOfWeek: [4], // Thursday
+                    startTime: '12:00', // 12:00 PM
+                    endTime: '13:00'   // 1:00 PM
+                }
+            ],
             eventContent: function (arg) {
                 if (arg.event && arg.event.title) {
                     return {

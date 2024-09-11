@@ -37,55 +37,70 @@ $(document).ready(function () {
             }
         });
 
+        // Function to handle retry with exponential backoff
+        function retryRequest(requestFunc, retries = 3, delay = 1000) {
+            requestFunc().catch(error => {
+                if (retries > 0) {
+                    console.warn(`Retrying in ${delay}ms... (${retries} attempts left)`);
+                    setTimeout(() => retryRequest(requestFunc, retries - 1, delay * 2), delay);
+                } else {
+                    console.error("Failed after multiple retries:", error);
+                }
+            });
+        }
+
         // Fetch providers (units) from SimplyBook.me
-        client.request('getUnitList', [], function (providers) {
-            if (providers) {
-                console.log("Fetched providers:", providers);
-                var resources = Object.values(providers).map(provider => ({
-                    id: provider.id,
-                    title: provider.name,
-                    position: parseInt(provider.position) || 0,
-                    color: provider.color || '',
-                    picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '',
-                    description: provider.description || ''
-                }));
+        retryRequest(() => {
+            return new Promise((resolve, reject) => {
+                client.request('getUnitList', [], function (providers) {
+                    if (providers) {
+                        console.log("Fetched providers:", providers);
+                        var resources = Object.values(providers).map(provider => ({
+                            id: provider.id,
+                            title: provider.name,
+                            position: parseInt(provider.position) || 0,
+                            color: provider.color || '',
+                            picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '',
+                            description: provider.description || ''
+                        }));
 
-                // Categorize resources by color
-                const categorizedResources = categorizeResourcesByColor(resources);
+                        // Categorize resources by color
+                        const categorizedResources = categorizeResourcesByColor(resources);
 
-                renderCalendar(resources, token, categorizedResources);
-            } else {
-                console.error("No providers returned. Please check the API response.");
-                renderCalendar([], token, {}); // Render empty calendar
-            }
-        }, function (error) {
-            console.error("Error fetching providers:", error);
-            renderCalendar([], token, {}); // Render empty calendar
+                        renderCalendar(resources, token, categorizedResources);
+                        resolve(); // Resolve the promise on success
+                    } else {
+                        console.error("No providers returned. Please check the API response.");
+                        renderCalendar([], token, {}); // Render empty calendar
+                        reject(new Error("No providers returned"));
+                    }
+                }, function (error) {
+                    console.error("Error fetching providers:", error);
+                    renderCalendar([], token, {}); // Render empty calendar
+                    reject(error); // Reject the promise on error
+                });
+            });
         });
     }
 
     function categorizeResourcesByColor(resources) {
-        // Define the mapping of color codes to category names
-        const colorToCategoryMap = {
+        const colorCategoryMap = {
             '#34bbf1': 'Training Suites',
             '#b07393': 'Activations Hub',
             '#71909f': 'Wellness & Spa',
             '#fac94e': 'Program'
-            // Add more mappings as needed
         };
 
         const categorizedResources = {};
 
-        // Categorize resources by color
         resources.forEach(resource => {
-            const category = colorToCategoryMap[resource.color] || 'Uncategorized'; // Default to 'Uncategorized'
+            const category = colorCategoryMap[resource.color] || 'Other';
             if (!categorizedResources[category]) {
                 categorizedResources[category] = [];
             }
             categorizedResources[category].push(resource);
         });
 
-        console.log("Categorized resources by color:", categorizedResources);
         return categorizedResources;
     }
 
@@ -310,26 +325,5 @@ $(document).ready(function () {
 
         calendar.render();
         console.log("Calendar rendered with events.");
-
-        // Render categories row above the resource row
-        renderCategoriesRow(categorizedResources);
-    }
-
-    function renderCategoriesRow(categorizedResources) {
-        const headerToolbarEl = document.querySelector('.fc-header-toolbar');
-        if (!headerToolbarEl) return;
-
-        const categoriesRow = document.createElement('div');
-        categoriesRow.className = 'fc-categories-row';
-
-        // Add each category to the row
-        Object.keys(categorizedResources).forEach(category => {
-            const categoryElement = document.createElement('div');
-            categoryElement.className = 'fc-category';
-            categoryElement.textContent = category;
-            categoriesRow.appendChild(categoryElement);
-        });
-
-        headerToolbarEl.insertAdjacentElement('afterend', categoriesRow); // Insert the categories row after the header
     }
 });

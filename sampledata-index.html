@@ -118,8 +118,8 @@
             cursor: pointer;
         }
 
-        .fc-resource-row.hidden {
-            display: none;
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
@@ -284,8 +284,14 @@
             // Show/hide resources under a specific category
             const resourcesInCategory = resources.filter(resource => resource.category === category);
             resourcesInCategory.forEach(resource => {
-                const resourceHeader = document.querySelector(`[data-resource-id="${resource.id}"]`).parentElement;
-                resourceHeader.classList.toggle('hidden');
+                const resourceHeader = document.querySelector(`[data-resource-id="${resource.id}"]`);
+                if (resourceHeader) {
+                    const colIndex = Array.from(resourceHeader.parentElement.children).indexOf(resourceHeader) + 1;
+                    const resourceCols = document.querySelectorAll(
+                        `.fc-col-header-cell:nth-child(${colIndex}), .fc-timegrid-col:nth-child(${colIndex})`
+                    );
+                    resourceCols.forEach(col => col.classList.toggle('hidden'));
+                }
             });
         }
 

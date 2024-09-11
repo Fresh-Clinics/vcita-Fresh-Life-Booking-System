@@ -46,7 +46,7 @@ $(document).ready(function () {
                     title: provider.name,
                     position: parseInt(provider.position) || 0,
                     color: provider.color || '',
-                    picture: provider.picture_path ? ${provider.picture_sub_path}/${provider.picture} : '',
+                    picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '',
                     description: provider.description || ''
                 }));
 
@@ -130,14 +130,12 @@ $(document).ready(function () {
                             processedCount++;
                             if (processedCount === events.length) {
                                 callback(calendarEvents); // Callback with all processed events
-                                applyRowColoring(); // Apply row coloring after rendering events
                             }
                         });
                     } else {
                         processedCount++;
                         if (processedCount === events.length) {
                             callback(calendarEvents); // Callback with all processed events
-                            applyRowColoring(); // Apply row coloring after rendering events
                         }
                     }
                 });
@@ -146,7 +144,6 @@ $(document).ready(function () {
                 processedCount++;
                 if (processedCount === events.length) {
                     callback(calendarEvents); // Callback with all processed events
-                    applyRowColoring(); // Apply row coloring after rendering events
                 }
             }
         });
@@ -175,7 +172,7 @@ $(document).ready(function () {
             if (timeMatrix && Object.keys(timeMatrix).length > 0) {
                 const firstDate = Object.keys(timeMatrix)[0]; // Get the first available date
                 const startTime = timeMatrix[firstDate][0];   // Get the first available time
-                const fullStartTime = ${firstDate}T${startTime}; // Combine to full ISO date-time string
+                const fullStartTime = `${firstDate}T${startTime}`; // Combine to full ISO date-time string
                 callback(fullStartTime);
             } else {
                 console.error("No start time available for the given parameters.");
@@ -238,9 +235,9 @@ $(document).ready(function () {
             eventContent: function (arg) {
                 if (arg.event && arg.event.title) {
                     return {
-                        html: <div class="fc-event-content">
+                        html: `<div class="fc-event-content" style="padding: 5px">
                                   <div class="fc-event-title">${arg.event.title}</div>
-                               </div>
+                               </div>`
                     };
                 } else {
                     console.warn("Event data is missing or incorrect", arg.event);
@@ -250,7 +247,7 @@ $(document).ready(function () {
             eventDidMount: function (info) {
                 // Initialize tippy.js for tooltips with HTML content
                 tippy(info.el, {
-                    content: <strong>${info.event.title}</strong><br>${info.event.extendedProps.description}, // Event name in bold and description below
+                    content: `<strong>${info.event.title}</strong><br>${info.event.extendedProps.description}`, // Event name in bold and description below
                     allowHTML: true, // Enable HTML in the tooltip
                     theme: 'light-border', // Choose a theme for the tooltip
                     placement: 'top', // Set the placement of the tooltip
@@ -263,12 +260,12 @@ $(document).ready(function () {
                 const date = event.start.toISOString().split('T')[0];
                 const time = event.start.toTimeString().split(' ')[0];
 
-                console.log(Booking: Category ${category}, Service ${service}, Date ${date}, Time ${time});
+                console.log(`Booking: Category ${category}, Service ${service}, Date ${date}, Time ${time}`);
 
                 // Display popup for booking
                 const popup = document.createElement('div');
                 popup.className = 'popup-overlay';
-                popup.innerHTML = 
+                popup.innerHTML = `
                     <div class="popup-content">
                         <span class="close-popup" onclick="this.parentElement.parentElement.remove()">×</span>
                         <h2>${event.title}</h2>
@@ -276,7 +273,7 @@ $(document).ready(function () {
                         <img src="${event.extendedProps.picture || ''}" alt="Provider Image" style="max-width: 100%;">
                         <div class="popup-message"><strong>Bookings open at 7pm AEST Monday 23rd October</strong></div>
                     </div>
-                ;
+                `;
                 document.body.appendChild(popup);
             },
             slotMinTime: '08:00:00', // Set the start time of slots to match your schedule
@@ -285,28 +282,5 @@ $(document).ready(function () {
 
         calendar.render();
         console.log("Calendar rendered with events.");
-    }
-
-    // Function to apply row coloring based on specific dates and times
-    function applyRowColoring() {
-        const slotTimes = [
-            { date: '2024-10-29', times: ['13:00:00', '15:30:00'], color: '#ebf7f4' },
-            { date: '2024-10-29', times: ['17:30:00'], color: '#cbe4e0' },
-            { date: '2024-10-30', times: ['11:30:00', '13:30:00', '16:00:00'], color: '#ebf7f4' },
-            { date: '2024-10-30', times: ['17:30:00'], color: '#cbe4e0' },
-            { date: '2024-10-31', times: ['11:00:00', '13:30:00', '16:00:00'], color: '#ebf7f4' },
-            { date: '2024-10-31', times: ['18:00:00'], color: '#0e4333', textColor: 'white' }
-        ];
-
-        slotTimes.forEach(({ date, times, color, textColor }) => {
-            times.forEach(time => {
-                $(.fc-timegrid-col[data-date="${date}"] .fc-timegrid-slot[data-time="${time}"]).each(function() {
-                    $(this).css({
-                        'background-color': color,
-                        'color': textColor || ''
-                    });
-                });
-            });
-        });
     }
 });

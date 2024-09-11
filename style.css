@@ -1,7 +1,7 @@
 body {
     margin: 40px 10px;
     padding: 0;
-    font-family: 'Manrope', Arial, Helvetica Neue, Helvetica, sans-serif;
+    font-family: 'Manrope', sans-serif; /* Set global font to Manrope */
     font-size: 14px;
     text-align: center;
 }
@@ -11,58 +11,55 @@ body {
     margin: 0 auto;
 }
 
-.fc-event-content {
-    background-color: #142652; /* Background color for events */
-    color: #FFFFFF; /* Event text color */
-    border-radius: 4px; /* Rounded corners for events */
-    padding: 2px 4px;
-    font-family: 'Manrope', sans-serif;
+.fc-timegrid-slot {
+    height: 60px !important; /* Adjusted value with !important */
+}
+
+.fc-event {
+    background-color: #142652 !important; /* Set event background color */
+    color: white; /* Ensure text is readable */
+    border: none; /* Remove border for a clean look */
 }
 
 .tippy-box {
-    background: #eae6e3; /* Tooltip background color */
-    color: #142652; /* Tooltip text color */
+    background: #eae6e3; /* Set tooltip background color */
+    color: #142652; /* Set tooltip text color */
     max-width: 200px;
     width: auto;
-    font-size: 0.8rem;
-    padding: 0.5em 1em;
-    font-family: 'Manrope', sans-serif;
+    font-size: .8rem;
+    padding: .5em 1em;
 }
 
 .tippy-box[data-placement^='top'] > .tippy-arrow::before {
-    border-top-color: #eae6e3; /* Tooltip arrow color */
+    border-top-color: #eae6e3; /* Match arrow color to tooltip background */
 }
 
-.fc-timegrid-slot {
-    height: 60px !important; /* Adjust height for time slots */
-}
-
-.popup {
-    display: none; /* Hidden by default */
+.popup-overlay {
     position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    border: 1px solid #888;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     z-index: 1000;
-    background-color: white;
-    width: 300px;
-    padding: 20px;
-    text-align: left;
 }
 
 .popup-content {
-    margin: 10px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    position: relative;
 }
 
-.close {
-    float: right;
-    font-size: 1.2em;
+.close-popup {
+    position: absolute;
+    top: 10px;
+    right: 10px;
     cursor: pointer;
-}
-
-h2 {
-    font-size: 1.2em;
-    font-family: 'Manrope', sans-serif;
 }

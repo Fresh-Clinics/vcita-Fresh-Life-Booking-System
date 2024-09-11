@@ -40,6 +40,10 @@
             height: 60px !important;
         }
 
+        .fc-timegrid-axis-frame {
+            height: 63px; /* Adjusted height */
+        }
+
         .fc-event {
             background-color: #142652 !important;
             color: white;
@@ -94,11 +98,10 @@
         }
 
         .fc-category-row {
-            display: flex;
+            display: table-row; /* Use table-row to behave like a table */
             justify-content: center;
             background-color: #eaeaea;
             padding: 5px 0;
-            cursor: pointer;
         }
 
         .fc-category-cell {
@@ -107,6 +110,7 @@
             font-weight: bold;
             border-right: 1px solid #ddd;
             position: relative;
+            min-width: 150px; /* Set minimum width for category cells */
         }
 
         .fc-category-cell .fc-category-toggle {
@@ -122,7 +126,7 @@
         }
 
         .fc-empty-column {
-            width: 150px; /* Default width for hidden column */
+            width: 150px; /* Fixed width for hidden column */
             background-color: #eaeaea;
         }
     </style>

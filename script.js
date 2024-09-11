@@ -130,12 +130,14 @@ $(document).ready(function () {
                             processedCount++;
                             if (processedCount === events.length) {
                                 callback(calendarEvents); // Callback with all processed events
+                                applyRowColoring(); // Apply row coloring after rendering events
                             }
                         });
                     } else {
                         processedCount++;
                         if (processedCount === events.length) {
                             callback(calendarEvents); // Callback with all processed events
+                            applyRowColoring(); // Apply row coloring after rendering events
                         }
                     }
                 });
@@ -144,6 +146,7 @@ $(document).ready(function () {
                 processedCount++;
                 if (processedCount === events.length) {
                     callback(calendarEvents); // Callback with all processed events
+                    applyRowColoring(); // Apply row coloring after rendering events
                 }
             }
         });
@@ -282,5 +285,26 @@ $(document).ready(function () {
 
         calendar.render();
         console.log("Calendar rendered with events.");
+    }
+
+    // Function to apply row coloring based on specific dates and times
+    function applyRowColoring() {
+        const slotTimes = [
+            { date: '2024-10-29', times: ['13:00:00', '15:30:00'], color: '#ebf7f4' },
+            { date: '2024-10-29', times: ['17:30:00'], color: '#cbe4e0' },
+            { date: '2024-10-30', times: ['11:30:00', '13:30:00', '16:00:00'], color: '#ebf7f4' },
+            { date: '2024-10-30', times: ['17:30:00'], color: '#cbe4e0' },
+            { date: '2024-10-31', times: ['11:00:00', '13:30:00', '16:00:00'], color: '#ebf7f4' },
+            { date: '2024-10-31', times: ['18:00:00'], color: '#0e4333', textColor: 'white' }
+        ];
+
+        slotTimes.forEach(({ date, times, color, textColor }) => {
+            times.forEach(time => {
+                $(`.fc-timegrid-col[data-date="${date}"] .fc-timegrid-slot-lane[data-time="${time}"]`).css({
+                    'background-color': color,
+                    'color': textColor || ''
+                });
+            });
+        });
     }
 });

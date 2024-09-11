@@ -174,7 +174,7 @@
                         description: provider.description || ''
                     }));
 
-                    renderCalendar(resources, token);
+                    renderCalendar(resources, token); // Pass resources directly to renderCalendar
                 } else {
                     console.error("No providers returned. Please check the API response.");
                     renderCalendar([], token); // Render empty calendar
@@ -185,7 +185,7 @@
             });
         }
 
-        function fetchEventsForRange(token, start, end, callback) {
+        function fetchEventsForRange(token, start, end, resources, callback) {
             var client = new JSONRpcClient({
                 'url': 'https://user-api.simplybook.me',
                 'headers': {
@@ -208,7 +208,7 @@
                     }
 
                     if (Array.isArray(events) && events.length > 0) {
-                        processEvents(events, token, start, end, callback);
+                        processEvents(events, token, start, end, resources, callback);
                     } else {
                         console.error("No valid events returned. Please check the API response.");
                         callback([]); // Return empty array if no events
@@ -223,7 +223,7 @@
             });
         }
 
-        function processEvents(events, token, start, end, callback) {
+        function processEvents(events, token, start, end, resources, callback) {
             var calendarEvents = [];
             var processedCount = 0;
 
@@ -347,7 +347,7 @@
                 resources: resources, // Use fetched resources directly
                 events: function (info, successCallback, failureCallback) {
                     // Fetch events for the current date range
-                    fetchEventsForRange(token, info.startStr, info.endStr, successCallback);
+                    fetchEventsForRange(token, info.startStr, info.endStr, resources, successCallback);
                 },
                 headerToolbar: {
                     left: 'prev',

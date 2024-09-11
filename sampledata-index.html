@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sample Calendar with Categories and Resources</title>
 
@@ -93,35 +92,6 @@
             right: 10px;
             cursor: pointer;
         }
-
-        .category-header {
-            font-weight: bold;
-            text-align: center;
-            background-color: #f0f0f0;
-            padding: 5px;
-        }
-
-        /* Replicate FullCalendar's header structure */
-        .fc-col-header-cell {
-            width: 150px !important;
-            min-width: 150px !important;
-            max-width: 150px !important;
-        }
-
-        .fc-category-row {
-            display: flex;
-            justify-content: center;
-            background-color: #eaeaea;
-            padding: 5px 0;
-        }
-
-        .fc-category-cell {
-            flex-grow: 1;
-            text-align: center;
-            padding: 5px;
-            font-weight: bold;
-            border-right: 1px solid #ddd;
-        }
     </style>
 </head>
 <body>
@@ -131,42 +101,34 @@
 <!-- Custom Scripts -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Sample data for categories
-        const categories = [
-            { id: 1, title: 'Program' },
-            { id: 2, title: 'Training Suites' },
-            { id: 3, title: 'Activations Hub' },
-            { id: 4, title: 'Wellness & Spa' }
-        ];
-
         // Sample data for resources
         const resources = [
-            { id: '1', title: 'Woodlands Stage', categoryId: 1 },
-            { id: '2', title: 'Fresh Lounge', categoryId: 1 },
-            { id: '3', title: 'Merz | Room 1', categoryId: 2 },
-            { id: '4', title: 'Merz | Room 2', categoryId: 2 },
-            { id: '5', title: 'Galderma | Room 1', categoryId: 2 },
-            { id: '6', title: 'Galderma | Room 2', categoryId: 2 },
-            { id: '7', title: 'Allergan', categoryId: 2 },
-            { id: '8', title: 'Evolus', categoryId: 2 },
-            { id: '9', title: 'Candela', categoryId: 2 },
-            { id: '10', title: 'Cryomed', categoryId: 2 },
-            { id: '11', title: 'Dermocosmetica | Room 1', categoryId: 2 },
-            { id: '12', title: 'Dermocosmetica | Room 2', categoryId: 2 },
-            { id: '13', title: 'EnVogue', categoryId: 2 },
-            { id: '14', title: 'Hugel', categoryId: 2 },
-            { id: '15', title: 'Rejuran', categoryId: 2 },
-            { id: '16', title: 'Teoxane', categoryId: 2 },
-            { id: '17', title: 'Xytide', categoryId: 2 },
-            { id: '18', title: 'Fresh Clinics | Room 1', categoryId: 2 },
-            { id: '19', title: 'Fresh Clinics | Room 2', categoryId: 2 },
-            { id: '20', title: 'Venus Concept', categoryId: 3 },
-            { id: '21', title: 'Alma', categoryId: 3 },
-            { id: '22', title: 'Advanced Skin Technology', categoryId: 3 },
-            { id: '23', title: 'Fresh Tech Hub', categoryId: 3 },
-            { id: '24', title: 'The Skincare Company', categoryId: 3 },
-            { id: '25', title: 'Wellness Sessions', categoryId: 4 },
-            { id: '26', title: 'The Fresh Spa', categoryId: 4 }
+            { id: '1', title: 'Woodlands Stage', category: 'Program' },
+            { id: '2', title: 'Fresh Lounge', category: 'Program' },
+            { id: '3', title: 'Merz | Room 1', category: 'Training Suites' },
+            { id: '4', title: 'Merz | Room 2', category: 'Training Suites' },
+            { id: '5', title: 'Galderma | Room 1', category: 'Training Suites' },
+            { id: '6', title: 'Galderma | Room 2', category: 'Training Suites' },
+            { id: '7', title: 'Allergan', category: 'Training Suites' },
+            { id: '8', title: 'Evolus', category: 'Training Suites' },
+            { id: '9', title: 'Candela', category: 'Training Suites' },
+            { id: '10', title: 'Cryomed', category: 'Training Suites' },
+            { id: '11', title: 'Dermocosmetica | Room 1', category: 'Training Suites' },
+            { id: '12', title: 'Dermocosmetica | Room 2', category: 'Training Suites' },
+            { id: '13', title: 'EnVogue', category: 'Training Suites' },
+            { id: '14', title: 'Hugel', category: 'Training Suites' },
+            { id: '15', title: 'Rejuran', category: 'Training Suites' },
+            { id: '16', title: 'Teoxane', category: 'Training Suites' },
+            { id: '17', title: 'Xytide', category: 'Training Suites' },
+            { id: '18', title: 'Fresh Clinics | Room 1', category: 'Training Suites' },
+            { id: '19', title: 'Fresh Clinics | Room 2', category: 'Training Suites' },
+            { id: '20', title: 'Venus Concept', category: 'Activations Hub' },
+            { id: '21', title: 'Alma', category: 'Activations Hub' },
+            { id: '22', title: 'Advanced Skin Technology', category: 'Activations Hub' },
+            { id: '23', title: 'Fresh Tech Hub', category: 'Activations Hub' },
+            { id: '24', title: 'The Skincare Company', category: 'Activations Hub' },
+            { id: '25', title: 'Wellness Sessions', category: 'Wellness & Spa' },
+            { id: '26', title: 'The Fresh Spa', category: 'Wellness & Spa' }
         ];
 
         // Sample data for events
@@ -210,6 +172,7 @@
                 right: 'next'
             },
             dayMinWidth: 150, // Set column width
+            resourceGroupField: 'category', // Group by category field
             resources: resources,
             events: events,
             height: 'auto',
@@ -251,30 +214,6 @@
         });
 
         calendar.render();
-
-        // Render the category headers above the resources
-        renderCategoryHeaders(resources, categories);
-
-        function renderCategoryHeaders(resources, categories) {
-            const resourceRows = calendarEl.querySelector('.fc-col-header .fc-col-header-cell');
-
-            categories.forEach(category => {
-                const resourcesInCategory = resources.filter(resource => resource.categoryId === category.id);
-                if (resourcesInCategory.length > 0) {
-                    const categoryRow = document.createElement('div');
-                    categoryRow.className = 'fc-category-row';
-
-                    resourcesInCategory.forEach(() => {
-                        const categoryCell = document.createElement('div');
-                        categoryCell.className = 'fc-category-cell';
-                        categoryCell.innerText = category.title;
-                        categoryRow.appendChild(categoryCell);
-                    });
-
-                    resourceRows.parentNode.insertAdjacentElement('beforebegin', categoryRow);
-                }
-            });
-        }
     });
 </script>
 

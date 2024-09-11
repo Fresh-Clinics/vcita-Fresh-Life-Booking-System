@@ -12,7 +12,7 @@ body {
 }
 
 .fc-timegrid-slot {
-    height: 90px; /* Adjust this value to increase/decrease the height of time slots */
+    height: 90px !important; /* Adjusted value with !important */
 }
 
 .tippy-box {

@@ -100,6 +100,21 @@
             padding: 5px;
             border-right: 1px solid #ddd;
         }
+
+        .fc-category-row {
+            display: flex;
+            justify-content: center;
+            background-color: #eaeaea;
+            padding: 5px 0;
+        }
+
+        .fc-category-cell {
+            flex-grow: 1;
+            text-align: center;
+            padding: 5px;
+            font-weight: bold;
+            border-right: 1px solid #ddd;
+        }
     </style>
 </head>
 <body>
@@ -138,9 +153,6 @@
             { id: '25', title: 'Wellness Sessions', category: 'Wellness & Spa' },
             { id: '26', title: 'The Fresh Spa', category: 'Wellness & Spa' }
         ];
-
-        // Group resources by category
-        const groupedResources = groupResourcesByCategory(resources);
 
         // Sample data for events
         const events = [
@@ -183,7 +195,7 @@
                 right: 'next'
             },
             dayMinWidth: 150, // Set column width
-            resources: groupedResources,
+            resources: resources,
             events: events,
             height: 'auto',
             slotMinTime: '08:00:00',
@@ -237,24 +249,34 @@
 
         calendar.render();
 
-        // Function to group resources by category
-        function groupResourcesByCategory(resources) {
-            const grouped = [];
-            const categories = [...new Set(resources.map(resource => resource.category))]; // Get unique categories
+        // Function to add category headers above resources
+        function addCategoryHeaders() {
+            const headerRow = calendarEl.querySelector('.fc-col-header .fc-col-header-cell');
 
-            categories.forEach(category => {
-                grouped.push({ id: category, title: category, children: [] }); // Category header
+            if (headerRow) {
+                const categoryRow = document.createElement('div');
+                categoryRow.className = 'fc-category-row';
 
-                // Push resources under each category
-                resources
-                    .filter(resource => resource.category === category)
-                    .forEach(resource => {
-                        grouped[grouped.length - 1].children.push(resource);
-                    });
-            });
+                const categories = [...new Set(resources.map(resource => resource.category))]; // Unique categories
+                categories.forEach(category => {
+                    const categoryCell = document.createElement('div');
+                    categoryCell.className = 'fc-category-cell';
+                    categoryCell.innerText = category;
+                    categoryCell.style.width = `${getCategoryWidth(category)}px`; // Calculate width dynamically
+                    categoryRow.appendChild(categoryCell);
+                });
 
-            return grouped;
+                headerRow.parentNode.insertBefore(categoryRow, headerRow);
+            }
         }
+
+        function getCategoryWidth(category) {
+            // Calculate width for each category based on the number of resources
+            const resourcesInCategory = resources.filter(resource => resource.category === category);
+            return resourcesInCategory.length * 150; // Multiply by column width
+        }
+
+        calendar.on('datesDidUpdate', addCategoryHeaders); // Call this function when dates change
     });
 </script>
 

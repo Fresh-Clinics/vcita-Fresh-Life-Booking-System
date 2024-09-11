@@ -214,7 +214,7 @@ $(document).ready(function () {
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             height: 'auto',
-            dayMinWidth: 100,
+            dayMinWidth: 150,
             slotDuration: '00:30:00',
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
             timeZone: 'Australia/Sydney', // Set timezone to AEST

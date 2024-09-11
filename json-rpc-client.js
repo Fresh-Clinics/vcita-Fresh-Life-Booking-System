@@ -1,80 +1,77 @@
-/**
- * JSON-RPC Client for SimplyBook.me API
- */
+class JSONRpcClient {
+    constructor(options) {
+        this.url = options.url;
+        this.headers = options.headers || {};
+        this.onerror = options.onerror || function () {};
+        this.requestQueue = []; // Queue to store requests
+        this.isRequestInProgress = false; // Flag to indicate if a request is in progress
+    }
 
-function JSONRpcClient(options) {
-    this.url = options.url;
-    this.headers = options.headers || {};
-    this.onerror = options.onerror || function () {};
-}
+    // New method to process the request queue with a delay
+    processQueue() {
+        if (this.isRequestInProgress || this.requestQueue.length === 0) return;
 
-/**
- * Make a JSON-RPC request to the server
- * @param {string} method - The RPC method to call
- * @param {Array} params - Parameters for the method
- * @param {function} callback - Callback function to handle the response
- */
-JSONRpcClient.prototype.request = function (method, params, callback) {
-    var requestData = {
-        jsonrpc: "2.0",
-        method: method,
-        params: params,
-        id: 1
-    };
+        const { method, params, onSuccess, onError } = this.requestQueue.shift(); // Get the next request
+        this.isRequestInProgress = true; // Mark request as in progress
 
-    $.ajax({
-        url: this.url,
-        type: "POST",
-        contentType: "application/json",
-        data: JSON.stringify(requestData),
-        headers: this.headers,
-        success: function (response) {
-            if (response.error) {
-                console.error("JSON-RPC Error:", response.error);
-                if (typeof this.onerror === 'function') {
-                    this.onerror(response.error);
+        this._sendRequest(method, params, (result) => {
+            onSuccess(result);
+            this.isRequestInProgress = false; // Mark request as done
+            setTimeout(() => this.processQueue(), 3000); // Delay next request by 3 seconds
+        }, (error) => {
+            onError(error);
+            this.isRequestInProgress = false; // Mark request as done
+            setTimeout(() => this.processQueue(), 3000); // Delay next request by 3 seconds
+        });
+    }
+
+    request(method, params, onSuccess, onError) {
+        this.requestQueue.push({ method, params, onSuccess, onError });
+        this.processQueue(); // Start processing the queue
+    }
+
+    _sendRequest(method, params, onSuccess, onError) {
+        $.ajax({
+            url: this.url,
+            type: 'POST',
+            contentType: 'application/json',
+            headers: this.headers,
+            data: JSON.stringify({
+                jsonrpc: '2.0',
+                method: method,
+                params: params,
+                id: 1
+            }),
+            success: function (response) {
+                if (response.error) {
+                    onError(response.error);
+                } else {
+                    onSuccess(response.result);
                 }
-            } else {
-                callback(response.result);
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error("AJAX Error:", error);
-            if (typeof this.onerror === 'function') {
-                this.onerror(error);
-            }
-        }
-    });
-};
+            },
+            error: this.onerror
+        });
+    }
 
-/**
- * Fetch the token using the SimplyBook.me API credentials
- * @param {string} companyLogin - The SimplyBook company login
- * @param {string} apiKey - The API key
- * @param {function} callback - Callback function to handle the token
- */
-JSONRpcClient.prototype.getToken = function (companyLogin, apiKey, callback) {
-    var requestData = {
-        jsonrpc: "2.0",
-        method: "getToken",
-        params: [companyLogin, apiKey],
-        id: 1
-    };
-
-    $.ajax({
-        url: this.url,
-        type: "POST",
-        contentType: "application/json",
-        data: JSON.stringify(requestData),
-        success: function (response) {
-            if (response.error) {
-                console.error("Error fetching token:", response.error);
-            } else {
-                callback(response.result);
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error("AJAX Error fetching token:", error);
-        }
-    });
-};
+    getToken(companyLogin, apiKey, callback) {
+        $.ajax({
+            url: this.url,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'getToken',
+                params: [companyLogin, apiKey],
+                id: 1
+            }),
+            success: function (response) {
+                if (response.result) {
+                    callback(response.result);
+                } else {
+                    console.error("Error fetching token:", response.error);
+                }
+            },
+            error: this.onerror
+        });
+    }
+}

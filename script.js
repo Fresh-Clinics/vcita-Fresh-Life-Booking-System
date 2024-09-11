@@ -277,10 +277,50 @@ $(document).ready(function () {
                 document.body.appendChild(popup);
             },
             slotMinTime: '08:00:00', // Set the start time of slots to match your schedule
-            slotMaxTime: '23:00:00'  // Set the end time of slots to match your schedule
+            slotMaxTime: '23:00:00',  // Set the end time of slots to match your schedule
+            viewDidMount: function () {
+                styleRows(); // Call after the view is rendered
+            }
         });
 
         calendar.render();
         console.log("Calendar rendered with events.");
+    }
+
+    function styleRows() {
+        // Define specific rows to be colored
+        const rowsToColor = {
+            '2024-10-29': {
+                '13:00:00': '#ebf7f4',
+                '15:30:00': '#ebf7f4',
+                '17:30:00': '#cbe4e0',
+            },
+            '2024-10-30': {
+                '11:30:00': '#ebf7f4',
+                '13:30:00': '#ebf7f4',
+                '16:00:00': '#ebf7f4',
+                '17:30:00': '#cbe4e0',
+            },
+            '2024-10-31': {
+                '11:00:00': '#ebf7f4',
+                '13:30:00': '#ebf7f4',
+                '16:00:00': '#ebf7f4',
+                '18:00:00': '#0e4333', // Dark row
+            }
+        };
+
+        // Loop through all slots in the time grid
+        document.querySelectorAll('.fc-timegrid-slot').forEach(function (slot) {
+            const date = slot.closest('[data-date]')?.getAttribute('data-date');
+            const time = slot.getAttribute('data-time');
+
+            // If date and time match our predefined list, apply the background color
+            if (date && time && rowsToColor[date] && rowsToColor[date][time]) {
+                slot.style.backgroundColor = rowsToColor[date][time];
+                if (rowsToColor[date][time] === '#0e4333') {
+                    slot.style.color = 'white'; // Apply white text color for dark rows
+                }
+            }
+        });
     }
 });

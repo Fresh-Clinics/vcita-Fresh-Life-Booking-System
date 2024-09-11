@@ -1,37 +1,71 @@
 body {
-    margin: 40px 10px;
+    margin: 0;
     padding: 0;
-    font-family: 'Manrope', sans-serif; /* Set global font to Manrope */
+    font-family: 'Manrope', sans-serif;
     font-size: 14px;
-    text-align: center;
+    height: 100vh;
+    overflow: hidden; /* Prevent body scrolling */
 }
 
 #calendar {
     max-width: 1100px;
     margin: 0 auto;
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    flex-direction: column;
+}
+
+.fc-header-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 10; /* Ensure it stays above other elements */
+    background-color: #fff; /* Same as page background */
+}
+
+.fc-col-header,
+.fc-col-header-cell {
+    position: sticky;
+    top: 38px; /* Adjust based on toolbar height */
+    z-index: 9; /* Stay above content but below toolbar */
+    background-color: #fff; /* Same as page background */
+}
+
+.fc-view-harness {
+    flex-grow: 1; /* Allow the main view to fill the remaining space */
+    overflow: hidden; /* Prevent overflow */
+    position: relative;
+}
+
+.fc-scroller {
+    height: calc(100vh - 80px); /* Adjust height to fill the space below sticky headers */
+    overflow-y: auto; /* Vertical scroll */
+    overflow-x: auto; /* Horizontal scroll */
+}
+
+.fc-timegrid-axis {
+    position: sticky;
+    left: 0;
+    z-index: 8; /* Lower than headers but above content */
+    background-color: #fff;
 }
 
 .fc-timegrid-slot {
-    height: 60px !important; /* Adjusted value with !important */
+    height: 60px !important; /* Adjusted time slot height */
 }
 
 .fc-event {
-    background-color: #142652 !important; /* Set event background color */
-    color: white; /* Ensure text is readable */
-    border: none; /* Remove border for a clean look */
+    background-color: #142652 !important; /* Event background */
+    color: white; /* Event text color */
+    border: none;
+    padding: 5px; /* Padding for event content */
 }
 
 .tippy-box {
-    background: #eae6e3; /* Set tooltip background color */
-    color: #142652; /* Set tooltip text color */
+    background: #eae6e3; /* Tooltip background */
+    color: #142652; /* Tooltip text color */
     max-width: 200px;
-    width: auto;
     font-size: .8rem;
     padding: .5em 1em;
-}
-
-.tippy-box[data-placement^='top'] > .tippy-arrow::before {
-    border-top-color: #eae6e3; /* Match arrow color to tooltip background */
 }
 
 .popup-overlay {
@@ -62,4 +96,12 @@ body {
     top: 10px;
     right: 10px;
     cursor: pointer;
+}
+
+/* Style for specific time slots */
+.fc-timegrid-slot[data-date="2024-10-29"][data-time="13:00:00"],
+.fc-timegrid-slot[data-date="2024-10-29"][data-time="15:30:00"],
+/* Add similar lines for other specific dates and times */
+{
+    background-color: #ebf7f4 !important; /* Background color for specific times */
 }

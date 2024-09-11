@@ -397,11 +397,12 @@
             };
         }
 
-        function handleBooking(category, service, date, time) {
+        // Make handleBooking globally accessible
+        window.handleBooking = function (category, service, date, time) {
             // Here, make API calls to SimplyBook.me to create the booking or handle the booking workflow
             console.log(`Booking: Category ${category}, Service ${service}, Date ${date}, Time ${time}`);
             // The booking URL will dynamically be formed based on the event data and client info
-        }
+        };
     });
 </script>
 

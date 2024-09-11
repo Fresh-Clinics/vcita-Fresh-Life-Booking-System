@@ -28,6 +28,7 @@ body {
     width: auto;
     font-size: .8rem;
     padding: .5em 1em;
+    text-align: left;
 }
 
 .tippy-box[data-placement^='top'] > .tippy-arrow::before {
@@ -55,6 +56,10 @@ body {
     width: 90%;
     text-align: center;
     position: relative;
+}
+
+.popup-content h2 {
+    font-size: 1.2em; /* Adjust font size for the popup title */
 }
 
 .close-popup {

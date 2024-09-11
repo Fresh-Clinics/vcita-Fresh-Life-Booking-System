@@ -141,7 +141,7 @@
         ];
 
         // Ensure resources are sorted by order_id correctly as numbers
-        resources.sort((a, b) => a.order_id - b.order_id);
+resources.sort((a, b) => Number(a.order_id) - Number(b.order_id));
 
         // Debug: Log the sorted order of resources
         console.log("Sorted Resources:", resources);

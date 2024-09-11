@@ -257,14 +257,14 @@
                     categoryCell.className = 'fc-category-cell';
                     categoryCell.innerHTML = `
                         <span>${category}</span>
-                        <span class="fc-category-toggle">+</span>
+                        <span class="fc-category-toggle">-</span>
                     `;
                     categoryCell.style.width = `${getCategoryWidth(category)}px`; // Calculate width dynamically
 
                     // Toggle visibility of resources under the category
                     categoryCell.querySelector('.fc-category-toggle').addEventListener('click', function () {
                         toggleCategoryResources(category);
-                        this.textContent = this.textContent === '+' ? '-' : '+';
+                        this.textContent = this.textContent === '-' ? '+' : '-';
                     });
 
                     categoryRow.appendChild(categoryCell);

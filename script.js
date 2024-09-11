@@ -10,8 +10,8 @@ $(document).ready(function () {
             }
         });
 
-        // Fetch token dynamically using the SimplyBook API credentials
-        loginClient.getToken('thefreshlifeconference', '5622f213016960fc53a1c61e6ac61aee0eabebcedd688b374f9761c9c6f69dce', function (token) {
+        // Fetch token dynamically using the new SimplyBook API credentials
+        loginClient.getToken('thefreshlifeconference', 'a5dc632dedf9f85bb8d5bfdd1a8087401787b413111ac0cfbca269a84ec348f3', function (token) {
             if (token) {
                 console.log("Fetched token: ", token);
                 // Fetch providers and then render the calendar with the token
@@ -37,71 +37,28 @@ $(document).ready(function () {
             }
         });
 
-        // Function to handle retry with exponential backoff
-        function retryRequest(requestFunc, retries = 3, delay = 1000) {
-            requestFunc().catch(error => {
-                if (retries > 0) {
-                    console.warn(`Retrying in ${delay}ms... (${retries} attempts left)`);
-                    setTimeout(() => retryRequest(requestFunc, retries - 1, delay * 2), delay);
-                } else {
-                    console.error("Failed after multiple retries:", error);
-                }
-            });
-        }
-
         // Fetch providers (units) from SimplyBook.me
-        retryRequest(() => {
-            return new Promise((resolve, reject) => {
-                client.request('getUnitList', [], function (providers) {
-                    if (providers) {
-                        console.log("Fetched providers:", providers);
-                        var resources = Object.values(providers).map(provider => ({
-                            id: provider.id,
-                            title: provider.name,
-                            position: parseInt(provider.position) || 0,
-                            color: provider.color || '',
-                            picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '',
-                            description: provider.description || ''
-                        }));
+        client.request('getUnitList', [], function (providers) {
+            if (providers) {
+                console.log("Fetched providers:", providers);
+                var resources = Object.values(providers).map(provider => ({
+                    id: provider.id,
+                    title: provider.name,
+                    position: parseInt(provider.position) || 0,
+                    color: provider.color || '',
+                    picture: provider.picture_path ? `${provider.picture_sub_path}/${provider.picture}` : '',
+                    description: provider.description || ''
+                }));
 
-                        // Categorize resources by color
-                        const categorizedResources = categorizeResourcesByColor(resources);
-
-                        renderCalendar(resources, token, categorizedResources);
-                        resolve(); // Resolve the promise on success
-                    } else {
-                        console.error("No providers returned. Please check the API response.");
-                        renderCalendar([], token, {}); // Render empty calendar
-                        reject(new Error("No providers returned"));
-                    }
-                }, function (error) {
-                    console.error("Error fetching providers:", error);
-                    renderCalendar([], token, {}); // Render empty calendar
-                    reject(error); // Reject the promise on error
-                });
-            });
-        });
-    }
-
-    function categorizeResourcesByColor(resources) {
-        const colorCategoryMap = {
-            '#34bbf1': 'Training Suites',
-            '#b07393': 'Activations Hub',
-            '#71909f': 'Wellness & Spa',
-            '#fac94e': 'Program'
-        };
-
-        const categorizedResources = {};
-
-        resources.forEach(resource => {
-            const category = colorCategoryMap[resource.color] || 'Other';
-            if (!categorizedResources[category]) {
-                categorizedResources[category] = [];
+                renderCalendar(resources, token);
+            } else {
+                console.error("No providers returned. Please check the API response.");
+                renderCalendar([], token); // Render empty calendar
             }
-            categorizedResources[category].push(resource);
+        }, function (error) {
+            console.error("Error fetching providers:", error);
+            renderCalendar([], token); // Render empty calendar
         });
-
-        return categorizedResources;
     }
 
     function fetchEventsForRange(token, start, end, callback) {
@@ -253,7 +210,7 @@ $(document).ready(function () {
         });
     }
 
-    function renderCalendar(resources, token, categorizedResources) {
+    function renderCalendar(resources, token) {
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             height: 'auto',

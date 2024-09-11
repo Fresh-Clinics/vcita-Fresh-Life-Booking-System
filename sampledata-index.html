@@ -101,11 +101,26 @@
             padding: 5px;
         }
 
-        /* Set column width */
+        /* Replicate FullCalendar's header structure */
         .fc-col-header-cell {
             width: 150px !important;
             min-width: 150px !important;
             max-width: 150px !important;
+        }
+
+        .fc-category-row {
+            display: flex;
+            justify-content: center;
+            background-color: #eaeaea;
+            padding: 5px 0;
+        }
+
+        .fc-category-cell {
+            flex-grow: 1;
+            text-align: center;
+            padding: 5px;
+            font-weight: bold;
+            border-right: 1px solid #ddd;
         }
     </style>
 </head>
@@ -187,7 +202,7 @@
         var calendar = new FullCalendar.Calendar(calendarEl, {
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
             initialView: 'resourceTimeGridDay',
-            initialDate: '2024-10-29',
+            InitialDate: '2024-10-29'
             timeZone: 'Australia/Sydney',
             headerToolbar: {
                 left: 'prev',
@@ -199,7 +214,7 @@
             events: events,
             height: 'auto',
             slotMinTime: '08:00:00',
-            slotMaxTime: '22:00:00',
+            slotMaxTime: '20:00:00',
             eventContent: function (arg) {
                 if (arg.event && arg.event.title) {
                     return {
@@ -207,6 +222,8 @@
                                   <div class="fc-event-title">${arg.event.title}</div>
                                </div>`
                     };
+                } else {
+                    return { html: '<div class="fc-event-content"><div class="fc-event-title">Invalid Event</div></div>' };
                 }
             },
             eventDidMount: function (info) {
@@ -214,23 +231,47 @@
                     content: `<strong>${info.event.title}</strong><br>${info.event.extendedProps.description}`,
                     allowHTML: true,
                     theme: 'light-border',
-                    placement: 'top',
+                    placement: 'top'
                 });
-            }
+            },
+            eventClick: function (info) {
+                const event = info.event;
+                const popup = document.createElement('div');
+                popup.className = 'popup-overlay';
+                popup.innerHTML = `
+                    <div class="popup-content">
+                        <span class="close-popup" onclick="this.parentElement.parentElement.remove()">×</span>
+                        <h2>${event.title}</h2>
+                        <p>${event.extendedProps.description}</p>
+                    </div>
+                `;
+                document.body.appendChild(popup);
+            },
+            allDaySlot: false
         });
 
-        // Add category headers dynamically
         calendar.render();
-        addCategoryHeaders();
 
-        function addCategoryHeaders() {
+        // Render the category headers above the resources
+        renderCategoryHeaders(resources, categories);
+
+        function renderCategoryHeaders(resources, categories) {
+            const resourceRows = calendarEl.querySelector('.fc-col-header .fc-col-header-cell');
+
             categories.forEach(category => {
-                const categoryResources = resources.filter(resource => resource.categoryId === category.id);
-                if (categoryResources.length > 0) {
-                    const header = document.createElement('div');
-                    header.className = 'category-header';
-                    header.innerHTML = category.title;
-                    calendarEl.parentNode.insertBefore(header, calendarEl);
+                const resourcesInCategory = resources.filter(resource => resource.categoryId === category.id);
+                if (resourcesInCategory.length > 0) {
+                    const categoryRow = document.createElement('div');
+                    categoryRow.className = 'fc-category-row';
+
+                    resourcesInCategory.forEach(() => {
+                        const categoryCell = document.createElement('div');
+                        categoryCell.className = 'fc-category-cell';
+                        categoryCell.innerText = category.title;
+                        categoryRow.appendChild(categoryCell);
+                    });
+
+                    resourceRows.parentNode.insertAdjacentElement('beforebegin', categoryRow);
                 }
             });
         }

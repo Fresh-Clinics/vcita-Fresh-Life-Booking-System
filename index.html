@@ -47,18 +47,45 @@
             border-top-color: #1E252B;
         }
 
-        .popup-content {
+        /* Modal styling */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
             padding: 20px;
-            text-align: center;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
         }
 
-        .popup-content img {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 20px;
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
         }
 
-        .popup-content button {
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .booking-button {
             padding: 10px 20px;
             background-color: #007bff;
             color: #fff;
@@ -67,7 +94,7 @@
             margin-top: 10px;
         }
 
-        .popup-content button:hover {
+        .booking-button:hover {
             background-color: #0056b3;
         }
     </style>
@@ -75,6 +102,16 @@
 <body>
 
 <div id="calendar"></div>
+
+<!-- Modal -->
+<div id="bookingModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="modalContent">
+            <!-- Dynamic content goes here -->
+        </div>
+    </div>
+</div>
 
 <script>
     $(document).ready(function () {
@@ -201,8 +238,9 @@
                                         end: endTime,
                                         resourceId: providerId,
                                         description: event.description || '',
-                                        category: event.categories ? event.categories[0] : '1', // Default category to 1 if not provided
-                                        service: event.id
+                                        picture: `${event.picture_path}/${event.picture}`,
+                                        category: event.category,  // Assuming category is provided in event data
+                                        service: event.id  // Assuming service ID is the event ID
                                     });
                                 }
 
@@ -333,25 +371,18 @@
                     });
                 },
                 eventClick: function(info) {
-                    // Create a modal for the popup
-                    var modal = document.createElement('div');
-                    modal.classList.add('popup-content');
-                    
-                    // Add event details to the modal
-                    modal.innerHTML = `
+                    // Show the modal
+                    var modal = document.getElementById('bookingModal');
+                    modal.style.display = "block";
+
+                    // Populate the modal with event details and the booking form
+                    var modalContent = document.getElementById('modalContent');
+                    modalContent.innerHTML = `
                         <h3>${info.event.title}</h3>
                         <p>${info.event.extendedProps.description}</p>
                         <img src="${info.event.extendedProps.picture}" alt="Provider Image">
-                        <button onclick="window.open('https://thefreshlifeconference.simplybook.net/v2/#book/category/${info.event.extendedProps.category}/service/${info.event.extendedProps.service}/count/1/date/${info.event.startStr.split('T')[0]}/time/${info.event.startStr.split('T')[1].split('+')[0]}/', '_blank')">Book Now</button>
+                        <button class="booking-button" onclick="handleBooking('${info.event.extendedProps.category}', '${info.event.extendedProps.service}', '${info.event.startStr.split('T')[0]}', '${info.event.startStr.split('T')[1].split('+')[0]}')">Book Now</button>
                     `;
-
-                    // Show the modal
-                    document.body.appendChild(modal);
-
-                    // Hide the modal when clicked outside
-                    modal.addEventListener('click', function() {
-                        document.body.removeChild(modal);
-                    });
                 },
                 slotMinTime: '08:00:00', // Set the start time of slots to match your schedule
                 slotMaxTime: '23:00:00'  // Set the end time of slots to match your schedule
@@ -359,6 +390,17 @@
 
             calendar.render();
             console.log("Calendar rendered with events.");
+
+            // Close the modal when the user clicks on <span> (x)
+            document.querySelector('.close').onclick = function() {
+                document.getElementById('bookingModal').style.display = "none";
+            };
+        }
+
+        function handleBooking(category, service, date, time) {
+            // Here, make API calls to SimplyBook.me to create the booking or handle the booking workflow
+            console.log(`Booking: Category ${category}, Service ${service}, Date ${date}, Time ${time}`);
+            // The booking URL will dynamically be formed based on the event data and client info
         }
     });
 </script>

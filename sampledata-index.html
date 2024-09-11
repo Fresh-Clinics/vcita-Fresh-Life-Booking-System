@@ -99,7 +99,6 @@
 
         .fc-category-row {
             display: table-row; /* Use table-row to behave like a table */
-            justify-content: center;
             background-color: #eaeaea;
             padding: 5px 0;
         }
@@ -294,6 +293,9 @@
         function toggleCategoryResources(category) {
             // Show/hide resources under a specific category
             const resourcesInCategory = resources.filter(resource => resource.category === category);
+            const categoryCell = document.querySelector(`.fc-category-cell:contains(${category})`);
+            const isExpanded = categoryCell.querySelector('.fc-category-toggle').textContent === '-';
+
             resourcesInCategory.forEach(resource => {
                 const resourceHeader = document.querySelector(`[data-resource-id="${resource.id}"]`);
                 if (resourceHeader) {
@@ -301,14 +303,12 @@
                     const resourceCols = document.querySelectorAll(
                         `.fc-col-header-cell:nth-child(${colIndex}), .fc-timegrid-col:nth-child(${colIndex})`
                     );
-                    resourceCols.forEach(col => col.classList.toggle('hidden'));
+                    resourceCols.forEach(col => col.classList.toggle('hidden', !isExpanded));
                 }
             });
 
             // Adjust the colspan dynamically when resources are hidden
-            const categoryCell = document.querySelector(`.fc-category-cell span:contains(${category})`).parentNode;
-            const isExpanded = categoryCell.querySelector('.fc-category-toggle').textContent === '-';
-            categoryCell.colSpan = isExpanded ? resourcesInCategory.length : 1; // If expanded, full colspan; otherwise, 1
+            categoryCell.colSpan = isExpanded ? 1 : resourcesInCategory.length;
         }
 
         addCategoryHeaders(); // Call the function once the calendar is rendered

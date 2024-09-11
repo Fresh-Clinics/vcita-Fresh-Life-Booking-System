@@ -8,16 +8,23 @@ body {
 #calendar {
     max-width: 1100px;
     margin: 0 auto;
-    height: calc(100vh - 100px); /* Adjust height to leave space for the sticky header */
+    height: calc(100vh - 100px); /* Adjust height to leave space for sticky headers */
     overflow-y: auto; /* Allow vertical scrolling for the calendar content */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    position: relative; /* Position relative for the sticky elements */
 }
 
 .fc .fc-col-header, 
-.fc-toolbar.fc-header-toolbar {
-    position: sticky;
+.fc-toolbar.fc-header-toolbar,
+.fc .fc-timegrid-axis-cushion { 
+    position: sticky; /* Make these elements sticky */
     top: 0;
     background: white; /* Ensure headers are visible over the content */
     z-index: 1000; /* Ensure headers are above all other content */
+}
+
+.fc .fc-col-header-cell-cushion {
+    top: 40px; /* Offset for the sticky toolbar */
 }
 
 .fc-timegrid-slot {

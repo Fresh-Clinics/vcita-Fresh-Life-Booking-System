@@ -100,6 +100,13 @@
             background-color: #f0f0f0;
             padding: 5px;
         }
+
+        /* Set column width */
+        .fc-col-header-cell {
+            width: 150px !important;
+            min-width: 150px !important;
+            max-width: 150px !important;
+        }
     </style>
 </head>
 <body>
@@ -186,6 +193,7 @@
                 center: 'title',
                 right: 'resourceTimeGridDay'
             },
+            dayMinWidth: 150, // Set column width
             resources: resources,
             events: events,
             height: 'auto',
@@ -220,16 +228,13 @@
                 if (categoryResources.length > 0) {
                     const header = document.createElement('div');
                     header.className = 'category-header';
-                    header.innerText = category.title;
-                    const firstResource = document.querySelector(`.fc-col-header-cell[data-resource-id="${categoryResources[0].id}"]`);
-                    if (firstResource) {
-                        firstResource.parentNode.insertBefore(header, firstResource);
-                        header.style.gridColumn = `span ${categoryResources.length}`;
-                    }
+                    header.innerHTML = category.title;
+                    calendarEl.parentNode.insertBefore(header, calendarEl);
                 }
             });
         }
     });
 </script>
+
 </body>
 </html>

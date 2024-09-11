@@ -1,7 +1,7 @@
 body {
     margin: 40px 10px;
     padding: 0;
-    font-family: 'Manrope', sans-serif; /* Set global font to Manrope */
+    font-family: 'Manrope', Arial, Helvetica Neue, Helvetica, sans-serif;
     font-size: 14px;
     text-align: center;
 }
@@ -12,60 +12,82 @@ body {
 }
 
 .fc-timegrid-slot {
-    height: 60px !important; /* Adjusted value with !important */
-    font-family: 'Manrope', sans-serif; /* Ensures consistent font */
+    height: 60px !important; /* Reduce timeslot height to 60px */
 }
 
 .fc-event {
-    background-color: #142652 !important; /* Set event background color */
-    color: white; /* Ensure text is readable */
-    border: none; /* Remove border for a clean look */
+    background-color: #142652 !important; /* Event background color */
+    color: #eae6e3 !important; /* Event text color */
+    font-family: 'Manrope', Arial, sans-serif !important;
 }
 
+.fc .fc-timegrid-slot-label-cushion {
+    font-family: 'Manrope', Arial, sans-serif !important;
+}
+
+/* Remove 'All Day' row */
+.fc-daygrid-day.fc-daygrid-day-top {
+    display: none !important;
+}
+
+/* Tooltip styles */
 .tippy-box {
-    background: #eae6e3; /* Set tooltip background color */
-    color: #142652; /* Set tooltip text color */
+    background: #eae6e3 !important; /* Tooltip background color */
+    color: #142652 !important; /* Tooltip text color */
     max-width: 200px;
     width: auto;
     font-size: .8rem;
     padding: .5em 1em;
-    text-align: left;
+    border-radius: 4px; /* Rounded corners for tooltip */
+    font-family: 'Manrope', Arial, sans-serif !important;
 }
 
 .tippy-box[data-placement^='top'] > .tippy-arrow::before {
-    border-top-color: #eae6e3; /* Match arrow color to tooltip background */
+    border-top-color: #eae6e3 !important; /* Tooltip arrow color */
 }
 
-.popup-overlay {
-    position: fixed;
-    top: 0;
+.tippy-content {
+    padding-bottom: 0 !important; /* Remove extra padding from tooltip */
+}
+
+/* Popup styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
     left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black background with opacity */
+    font-family: 'Manrope', Arial, sans-serif !important;
 }
 
-.popup-content {
-    background: white;
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
     padding: 20px;
-    border-radius: 8px;
-    max-width: 400px;
-    width: 90%;
-    text-align: center;
-    position: relative;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    text-align: left; /* Align text to the left */
 }
 
-.popup-content h2 {
-    font-size: 1.2em; /* Adjust font size for the popup title */
+.modal h2 {
+    font-size: 1.2em; /* Smaller title size */
+    margin-bottom: 1em;
 }
 
-.close-popup {
-    position: absolute;
-    top: 10px;
-    right: 10px;
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
     cursor: pointer;
 }

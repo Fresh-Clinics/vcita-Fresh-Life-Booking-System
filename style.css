@@ -5,12 +5,15 @@ body {
     font-size: 14px;
     text-align: center;
     overflow: hidden; /* Prevent scrolling of the entire page */
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Viewport height */
 }
 
 #calendar {
     max-width: 1100px;
     margin: 0 auto;
-    height: 100vh; /* Set calendar height to full view height */
+    height: 100%; /* Set calendar height to full view height */
     display: flex;
     flex-direction: column; /* Make calendar and toolbar flex items */
 }
@@ -101,23 +104,23 @@ body {
 }
 
 /* Row color styles for specific times on specific dates */
-.fc-timegrid-col[data-date="2024-10-29"] .fc-timegrid-slot[data-time="13:00:00"],
-.fc-timegrid-col[data-date="2024-10-29"] .fc-timegrid-slot[data-time="15:30:00"],
-.fc-timegrid-col[data-date="2024-10-30"] .fc-timegrid-slot[data-time="11:30:00"],
-.fc-timegrid-col[data-date="2024-10-30"] .fc-timegrid-slot[data-time="13:30:00"],
-.fc-timegrid-col[data-date="2024-10-30"] .fc-timegrid-slot[data-time="16:00:00"],
-.fc-timegrid-col[data-date="2024-10-31"] .fc-timegrid-slot[data-time="11:00:00"],
-.fc-timegrid-col[data-date="2024-10-31"] .fc-timegrid-slot[data-time="13:30:00"],
-.fc-timegrid-col[data-date="2024-10-31"] .fc-timegrid-slot[data-time="16:00:00"] {
-    background-color: #ebf7f4; /* Set default row color */
+.fc-timegrid-col[data-date="2024-10-29"] .fc-timegrid-slot-lane[data-time="13:00:00"],
+.fc-timegrid-col[data-date="2024-10-29"] .fc-timegrid-slot-lane[data-time="15:30:00"],
+.fc-timegrid-col[data-date="2024-10-30"] .fc-timegrid-slot-lane[data-time="11:30:00"],
+.fc-timegrid-col[data-date="2024-10-30"] .fc-timegrid-slot-lane[data-time="13:30:00"],
+.fc-timegrid-col[data-date="2024-10-30"] .fc-timegrid-slot-lane[data-time="16:00:00"],
+.fc-timegrid-col[data-date="2024-10-31"] .fc-timegrid-slot-lane[data-time="11:00:00"],
+.fc-timegrid-col[data-date="2024-10-31"] .fc-timegrid-slot-lane[data-time="13:30:00"],
+.fc-timegrid-col[data-date="2024-10-31"] .fc-timegrid-slot-lane[data-time="16:00:00"] {
+    background-color: #ebf7f4 !important; /* Set default row color */
 }
 
-.fc-timegrid-col[data-date="2024-10-29"] .fc-timegrid-slot[data-time="17:30:00"],
-.fc-timegrid-col[data-date="2024-10-30"] .fc-timegrid-slot[data-time="17:30:00"] {
-    background-color: #cbe4e0; /* Set alternate row color */
+.fc-timegrid-col[data-date="2024-10-29"] .fc-timegrid-slot-lane[data-time="17:30:00"],
+.fc-timegrid-col[data-date="2024-10-30"] .fc-timegrid-slot-lane[data-time="17:30:00"] {
+    background-color: #cbe4e0 !important; /* Set alternate row color */
 }
 
-.fc-timegrid-col[data-date="2024-10-31"] .fc-timegrid-slot[data-time="18:00:00"] {
-    background-color: #0e4333; /* Dark row */
-    color: white; /* Set text color for dark row */
+.fc-timegrid-col[data-date="2024-10-31"] .fc-timegrid-slot-lane[data-time="18:00:00"] {
+    background-color: #0e4333 !important; /* Dark row */
+    color: white !important; /* Set text color for dark row */
 }

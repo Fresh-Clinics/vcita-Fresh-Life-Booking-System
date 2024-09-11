@@ -21,6 +21,10 @@ body {
     border: none; /* Remove border for a clean look */
 }
 
+.fc-event-content {
+    padding: 5px; /* Add padding to event content */
+}
+
 .tippy-box {
     background: #eae6e3; /* Set tooltip background color */
     color: #142652; /* Set tooltip text color */

@@ -245,7 +245,8 @@
                                         start: startTime,
                                         end: endTime,
                                         resourceId: providerId,
-                                        description: event.description || ''
+                                        description: event.description || '',
+                                        providerPicture: resources.find(r => r.id === providerId)?.picture || '',
                                     });
                                 }
 
@@ -343,14 +344,7 @@
                 timeZone: 'Australia/Sydney', // Set timezone to AEST
                 initialView: 'resourceTimeGridDay',
                 initialDate: '2024-10-29',
-                resources: function (callback) {
-                    // Fetch resources and filter out those without events
-                    fetchEventsForRange(token, calendar.view.activeStart.toISOString().split('T')[0], calendar.view.activeEnd.toISOString().split('T')[0], function (events) {
-                        const providersWithEvents = new Set(events.map(event => event.resourceId));
-                        const filteredResources = resources.filter(resource => providersWithEvents.has(resource.id));
-                        callback(filteredResources);
-                    });
-                },
+                resources: resources, // Use fetched resources directly
                 events: function (info, successCallback, failureCallback) {
                     // Fetch events for the current date range
                     fetchEventsForRange(token, info.startStr, info.endStr, successCallback);

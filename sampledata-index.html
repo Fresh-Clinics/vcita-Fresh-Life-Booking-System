@@ -97,8 +97,15 @@
 
 /* Custom styles for non-business hours */
         .fc-non-business {
-            background-color: #ebf7f4 !important; /* Set non-business hours background color */
+            background-color: #d6d6d6 !important; /* Set non-business hours background color */
         }
+
+        /* Custom styles for custom-event-display hours */
+.custom-event-display {
+    background-color: #ebf7f4 !important; /* Set custom background color */
+    border: 1px solid #0e4333; /* Optional: add a border for visibility */
+    color: #0e4333; /* Set custom text color */
+}
     </style>
 </head>
 <body>
@@ -167,6 +174,15 @@
                 end: '2024-10-29T15:30:00',
                 resourceId: '4'
             }
+            {
+                id: '4',
+                title: 'Afternoon Tea, Sponsor Activations & Networking',
+                description: 'On The Deck and Restaurant Area',
+                start: '2024-10-29T15:30:00',
+                end: '2024-10-29T16:00:00',
+                resourceId: '1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26',
+                display: 'custom-event-display' // Use custom display property
+            }
         ];
 
         // Render the calendar
@@ -185,6 +201,8 @@
             resources: resources,
             events: events,
             height: 'auto',
+            slotMinTime: '07:00',
+            slotMaxTime: '23:00',
             resourceOrder: 'order_id', // Order by order_id
             businessHours: [
                 {
@@ -253,6 +271,12 @@
                     endTime: '22:30'
                 }
             ],
+            eventClassNames: function (arg) {
+                if (arg.event.extendedProps.display === 'custom-event-display') {
+                    return ['custom-event-display']; // Add custom class
+                }
+                return [];
+            },
             eventContent: function (arg) {
                 if (arg.event && arg.event.title) {
                     return {

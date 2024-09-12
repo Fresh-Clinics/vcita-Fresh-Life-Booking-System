@@ -100,8 +100,8 @@
             background-color: #d6d6d6 !important; /* Set non-business hours background color */
         }
 
-        /* Custom styles for inverse background events */
-        .fc .fc-event-inverse-background {
+        /* Custom styles for custom-event-display hours */
+        .background {
             background-color: #ebf7f4 !important; /* Set custom background color */
             border: 1px solid #0e4333; /* Optional: add a border for visibility */
             color: #0e4333 !important; /* Set custom text color */
@@ -181,7 +181,7 @@
                 start: '2024-10-29T15:30:00',
                 end: '2024-10-29T16:00:00',
                 resourceId: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26'],
-                display: 'inverse-background' // Use inverse-background display property
+                display: 'background' // Use custom display property
             }
         ];
 
@@ -256,6 +256,23 @@
                     endTime: '22:30'
                 }
             ],
+            eventClassNames: function (arg) {
+                if (arg.event.extendedProps.display === 'custom-event-display') {
+                    return ['custom-event-display']; // Add custom class
+                }
+                return [];
+            },
+            eventContent: function (arg) {
+                if (arg.event && arg.event.title) {
+                    return {
+                        html: `<div class="fc-event-content">
+                                  <div class="fc-event-title">${arg.event.title}</div>
+                               </div>`
+                    };
+                } else {
+                    return { html: '<div class="fc-event-content"><div class="fc-event-title">Invalid Event</div></div>' };
+                }
+            },
             eventDidMount: function (info) {
                 tippy(info.el, {
                     content: `<strong>${info.event.title}</strong><br>${info.event.extendedProps.description}`,

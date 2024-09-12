@@ -11,7 +11,7 @@ $(document).ready(function () {
         });
 
         // Fetch token dynamically using the SimplyBook API credentials
-        loginClient.getToken('thefreshlifeconference', '5622f213016960fc53a1c61e6ac61aee0eabebcedd688b374f9761c9c6f69dce', function (token) {
+        loginClient.getToken('thefreshlifeconference', 'a5dc632dedf9f85bb8d5bfdd1a8087401787b413111ac0cfbca269a84ec348f3', function (token) {
             if (token) {
                 console.log("Fetched token: ", token);
                 // Fetch providers and then render the calendar with the token

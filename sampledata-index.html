@@ -95,9 +95,9 @@
             height: 6em; /* Update row height */
         }
 
-        /* Custom styles for blocked times */
+        /* Custom styles for non-business hours */
         .fc-non-business {
-            background-color: #0e4333 !important; /* Set blocked out time background color */
+            background-color: #ebf7f4 !important; /* Set non-business hours background color */
         }
     </style>
 </head>
@@ -169,6 +169,20 @@
             }
         ];
 
+        // Function to dynamically set slotMinTime and slotMaxTime based on the day
+        function getSlotTimes(dayOfWeek) {
+            switch (dayOfWeek) {
+                case 2: // Tuesday
+                    return { slotMinTime: '09:00', slotMaxTime: '19:00' };
+                case 3: // Wednesday
+                    return { slotMinTime: '07:30', slotMaxTime: '19:00' };
+                case 4: // Thursday
+                    return { slotMinTime: '07:00', slotMaxTime: '22:30' };
+                default:
+                    return { slotMinTime: '08:00', slotMaxTime: '23:00' };
+            }
+        }
+
         // Render the calendar
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -181,35 +195,90 @@
                 center: 'title',
                 right: 'next'
             },
-            dayMinWidth: 150, // Set column width
             resources: resources,
             events: events,
             height: 'auto',
-            slotMinTime: '08:00:00',
-            slotMaxTime: '23:00:00',
-            resourceOrder: 'order_id', // Order by order_id
             businessHours: [
                 {
-                    daysOfWeek: [2], // Tuesday
-                    startTime: '14:30', // 2:30 PM
-                    endTime: '15:00' // 3:00 PM
+                    daysOfWeek: [2],
+                    startTime: '09:00',
+                    endTime: '13:00'
                 },
                 {
-                    daysOfWeek: [2], // Tuesday
-                    startTime: '17:30', // 5:30 PM
-                    endTime: '18:30' // 6:30 PM
+                    daysOfWeek: [2],
+                    startTime: '14:00',
+                    endTime: '15:30'
                 },
                 {
-                    daysOfWeek: [3], // Wednesday
-                    startTime: '11:30', // 11:30 AM
-                    endTime: '12:00' // 12:00 PM
+                    daysOfWeek: [2],
+                    startTime: '16:00',
+                    endTime: '17:30'
                 },
                 {
-                    daysOfWeek: [4], // Thursday
-                    startTime: '12:00', // 12:00 PM
-                    endTime: '13:00' // 1:00 PM
+                    daysOfWeek: [2],
+                    startTime: '18:30',
+                    endTime: '19:00'
+                },
+                {
+                    daysOfWeek: [3],
+                    startTime: '07:30',
+                    endTime: '11:30'
+                },
+                {
+                    daysOfWeek: [3],
+                    startTime: '12:00',
+                    endTime: '13:30'
+                },
+                {
+                    daysOfWeek: [3],
+                    startTime: '14:30',
+                    endTime: '16:00'
+                },
+                {
+                    daysOfWeek: [3],
+                    startTime: '16:30',
+                    endTime: '17:30'
+                },
+                {
+                    daysOfWeek: [3],
+                    startTime: '18:30',
+                    endTime: '19:00'
+                },
+                {
+                    daysOfWeek: [4],
+                    startTime: '07:00',
+                    endTime: '11:00'
+                },
+                {
+                    daysOfWeek: [4],
+                    startTime: '11:30',
+                    endTime: '13:30'
+                },
+                {
+                    daysOfWeek: [4],
+                    startTime: '14:30',
+                    endTime: '16:00'
+                },
+                {
+                    daysOfWeek: [4],
+                    startTime: '16:30',
+                    endTime: '22:30'
                 }
             ],
+            slotMinTime: '08:00',
+            slotMaxTime: '23:00',
+            views: {
+                resourceTimeGridDay: {
+                    slotMinTime: '08:00',
+                    slotMaxTime: '23:00',
+                    dayHeaderContent: function (arg) {
+                        // Adjust slotMinTime and slotMaxTime based on day of week
+                        const slotTimes = getSlotTimes(arg.date.getDay());
+                        calendar.setOption('slotMinTime', slotTimes.slotMinTime);
+                        calendar.setOption('slotMaxTime', slotTimes.slotMaxTime);
+                    }
+                }
+            },
             eventContent: function (arg) {
                 if (arg.event && arg.event.title) {
                     return {

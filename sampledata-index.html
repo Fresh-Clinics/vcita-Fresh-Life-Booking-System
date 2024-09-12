@@ -90,22 +90,22 @@
             cursor: pointer;
         }
 
-/* Custom row height */
+        /* Custom row height */
         .fc .fc-timegrid-slot {
             height: 6em; /* Update row height */
         }
 
-/* Custom styles for non-business hours */
+        /* Custom styles for non-business hours */
         .fc-non-business {
             background-color: #d6d6d6 !important; /* Set non-business hours background color */
         }
 
         /* Custom styles for custom-event-display hours */
-.custom-event-display {
-    background-color: #ebf7f4 !important; /* Set custom background color */
-    border: 1px solid #0e4333; /* Optional: add a border for visibility */
-    color: #0e4333; /* Set custom text color */
-}
+        .fc .custom-event-display {
+            background-color: #ebf7f4 !important; /* Set custom background color */
+            border: 1px solid #0e4333; /* Optional: add a border for visibility */
+            color: #0e4333 !important; /* Set custom text color */
+        }
     </style>
 </head>
 <body>
@@ -180,7 +180,7 @@
                 description: 'On The Deck and Restaurant Area',
                 start: '2024-10-29T15:30:00',
                 end: '2024-10-29T16:00:00',
-                resourceId: '1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26',
+                resourceId: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26'],
                 display: 'custom-event-display' // Use custom display property
             }
         ];
@@ -210,7 +210,6 @@
                     startTime: '09:00',
                     endTime: '18:30'
                 },
-                
                 {
                     daysOfWeek: [3],
                     startTime: '07:30',

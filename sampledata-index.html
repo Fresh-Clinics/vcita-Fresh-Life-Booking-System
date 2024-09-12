@@ -95,8 +95,8 @@
             height: 6em; /* Update row height */
         }
 
-        /* Custom styles for specific blocked times */
-        .blocked-time {
+        /* Custom styles for blocked times */
+        .fc-non-business {
             background-color: #0e4333 !important; /* Set blocked out time background color */
         }
     </style>
@@ -188,20 +188,28 @@
             slotMinTime: '08:00:00',
             slotMaxTime: '23:00:00',
             resourceOrder: 'order_id', // Order by order_id
-            slotLaneClassNames: function (arg) {
-                const blockedTimes = [
-                    { day: 2, start: '14:30', end: '15:00' },   // Tuesday 2:30 PM - 3:00 PM
-                    { day: 2, start: '17:30', end: '18:30' },   // Tuesday 5:30 PM - 6:30 PM
-                    { day: 3, start: '11:30', end: '12:00' },   // Wednesday 11:30 AM - 12:00 PM
-                    { day: 4, start: '12:00', end: '13:00' }    // Thursday 12:00 PM - 1:00 PM
-                ];
-                const day = arg.date.getDay();
-                const time = arg.date.toTimeString().substring(0, 5);
-                if (blockedTimes.some(bt => bt.day === day && bt.start <= time && bt.end > time)) {
-                    return ['blocked-time'];
+            businessHours: [
+                {
+                    daysOfWeek: [2], // Tuesday
+                    startTime: '14:30', // 2:30 PM
+                    endTime: '15:00' // 3:00 PM
+                },
+                {
+                    daysOfWeek: [2], // Tuesday
+                    startTime: '17:30', // 5:30 PM
+                    endTime: '18:30' // 6:30 PM
+                },
+                {
+                    daysOfWeek: [3], // Wednesday
+                    startTime: '11:30', // 11:30 AM
+                    endTime: '12:00' // 12:00 PM
+                },
+                {
+                    daysOfWeek: [4], // Thursday
+                    startTime: '12:00', // 12:00 PM
+                    endTime: '13:00' // 1:00 PM
                 }
-                return [];
-            },
+            ],
             eventContent: function (arg) {
                 if (arg.event && arg.event.title) {
                     return {
